@@ -17,7 +17,7 @@ class SplitsaApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Splitsa',
-      debugShowCheckedModeBanner: AppConfig.instance.isDev,
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.dark, // the app is always in dark mode per spec
       routerConfig: router,
     );

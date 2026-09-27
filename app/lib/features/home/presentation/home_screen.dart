@@ -249,7 +249,7 @@ class HomeScreen extends ConsumerWidget {
             
             // Horizontal scroll for rooms
             SizedBox(
-              height: 140,
+              height: 164,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 clipBehavior: Clip.none,

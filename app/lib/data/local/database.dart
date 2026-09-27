@@ -1,8 +1,4 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,6 +11,7 @@ import 'daos/profile_dao.dart';
 import 'daos/room_dao.dart';
 import 'daos/expense_dao.dart';
 import 'daos/sync_dao.dart';
+import 'connection.dart';
 
 part 'database.g.dart';
 
@@ -41,7 +38,7 @@ part 'database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
@@ -58,13 +55,6 @@ class AppDatabase extends _$AppDatabase {
   );
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'splitsa.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
-}
 
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {

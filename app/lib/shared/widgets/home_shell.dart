@@ -10,10 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../features/expenses/presentation/widgets/expense_type_sheet.dart';
+import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
 import 'pill_tab_bar.dart';
-// Sheets are imported lazily when needed (not yet implemented)
-
-class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
@@ -32,10 +31,11 @@ class HomeShell extends StatelessWidget {
           // stack, matching normal bottom-tab behaviour
           shell.goBranch(index, initialLocation: index == shell.currentIndex);
         },
-        onAddPressed: () {
-          // TODO: show ExpenseTypeSheet bottom sheet
-          // Will be implemented in the Add Expense feature.
-          _showComingSoon(context, 'Add expense');
+        onAddPressed: () async {
+          final ctx = await ExpenseTypeSheet.show(context);
+          if (ctx != null && context.mounted) {
+            await AddExpenseSheet.show(context, ctx);
+          }
         },
       ),
     );

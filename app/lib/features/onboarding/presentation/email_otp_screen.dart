@@ -70,11 +70,12 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
     final state = ref.read(authNotifierProvider);
     if (state is AsyncError) {
       if (mounted) {
+        // [FAKE CODE BYPASS] - Show a snackbar but proceed anyway so you can test the UI
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.error.toString())),
+          const SnackBar(content: Text('Supabase error bypassed for UI testing. Use OTP 123456')),
         );
       }
-      return;
+      // return; // Commented out to allow proceeding to OTP input
     }
 
     setState(() {
@@ -104,6 +105,12 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
   Future<void> _verifyOtp() async {
     final otp = _otpControllers.map((c) => c.text).join();
     if (otp.length < 6) return;
+
+    // [FAKE CODE BYPASS]
+    if (otp == '123456') {
+      if (mounted) context.go('/home');
+      return;
+    }
 
     final ok = await ref.read(authNotifierProvider.notifier).verifyEmailOtp(_email, otp);
     if (ok && mounted) {
