@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/icon_badge.dart';
 import '../../../shared/widgets/avatar_widget.dart';
+import 'widgets/settle_sheet.dart';
 
 class RoomDetailScreen extends ConsumerWidget {
   const RoomDetailScreen({
@@ -212,7 +213,7 @@ class RoomDetailScreen extends ConsumerWidget {
               right: AppSpacing.xl,
               child: FilledButton(
                 onPressed: () {
-                  // Push settle sheet
+                  SettleSheet.show(context);
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.marigold,
