@@ -1,0 +1,65 @@
+name: splitsa
+description: Expense splitting and savings for flatmates and friend groups.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.12.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── State management ───────────────────────────────────────────────────────
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # ── Navigation ─────────────────────────────────────────────────────────────
+  go_router: ^14.6.2
+
+  # ── Data classes ───────────────────────────────────────────────────────────
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # ── Local database (offline-first) ─────────────────────────────────────────
+  drift: ^2.22.0
+  sqlite3_flutter_libs: ^0.5.26
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # ── Backend ────────────────────────────────────────────────────────────────
+  supabase_flutter: ^2.8.0
+
+  # ── Auth / deep links ──────────────────────────────────────────────────────
+  app_links: ^6.4.0           # deep-link handling for email magic-link / OTP redirect
+
+  # ── Utilities ──────────────────────────────────────────────────────────────
+  uuid: ^4.5.1                # UUIDv7 generation
+  flutter_secure_storage: ^9.2.2
+  intl: ^0.20.1               # number/date formatting (₹ amounts)
+
+  # ── Animations ─────────────────────────────────────────────────────────────
+  # Using Flutter's built-in animation primitives — no external animation lib required
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.9.0
+  riverpod_generator: ^2.6.1
+  drift_dev: ^2.22.0
+
+  # Linting
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  # Assets and fonts are added here as features are built.
+  # Google Fonts are loaded at runtime via dart:html (PWA) / network — no asset bundling.
+
+dependency_overrides:
+  analyzer_plugin: ^0.13.0
+

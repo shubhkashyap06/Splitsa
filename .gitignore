@@ -1,0 +1,17 @@
+# Ignore all markdown files (as requested, to hide AI context)
+*.md
+docs/
+reference/
+SPLITSA UI FIGMA.zip
+
+# Environment configurations
+*.env*
+.env
+
+# Node modules for supabase edge functions
+supabase/functions/**/node_modules/
+.supabase/
+
+# Python venv and cache
+ml/venv/
+ml/__pycache__/
