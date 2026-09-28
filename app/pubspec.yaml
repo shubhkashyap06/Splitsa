@@ -37,6 +37,7 @@ dependencies:
   uuid: ^4.5.1                # UUIDv7 generation
   flutter_secure_storage: ^9.2.2
   intl: ^0.20.1               # number/date formatting (₹ amounts)
+  url_launcher: ^6.3.1        # UPI deep links + external URLs
 
   # ── Animations ─────────────────────────────────────────────────────────────
   # Using Flutter's built-in animation primitives — no external animation lib required

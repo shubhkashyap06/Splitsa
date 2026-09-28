@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../recommendations/recommendation_models.dart';
+import '../../../recommendations/recommendation_models.dart';
 
 /// Savings nudge bottom sheet — shows a savings recommendation
 /// from the RecommendationEngine (v1: LogicRecommendationEngine).

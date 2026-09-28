@@ -86,8 +86,8 @@ class SpendFeatureBuilder {
 
     // Last week's actual by category
     final lastWeekActual = <String, int>{};
-    for (final t in (weekBuckets[0] ?? [])) {
-      lastWeekActual[t.category] = (lastWeekActual[t.category] ?? 0) + t.amountPaise;
+    for (final t in (weekBuckets[0] ?? <_Transaction>[])) {
+      lastWeekActual[t.category] = (lastWeekActual[t.category] ?? 0) + (t.amountPaise as int);
     }
 
     // Weekend vs weekday spend

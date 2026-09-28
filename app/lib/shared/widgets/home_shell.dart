@@ -10,9 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../features/expenses/presentation/widgets/expense_type_sheet.dart';
-import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
+import '../../features/expenses/presentation/widgets/expense_type_sheet.dart';
+import '../../features/expenses/presentation/widgets/add_expense_sheet.dart';
 import 'pill_tab_bar.dart';
+
+class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.shell});
   final StatefulNavigationShell shell;
 
