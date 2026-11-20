@@ -8,11 +8,10 @@ import 'main.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppConfig.init();
+  if (AppConfig.instance.demoMode) {
+    throw StateError('DEMO mode is dev-only and must not ship in prod');
+  }
   await SupabaseService.init();
 
-  runApp(
-    const ProviderScope(
-      child: SplitsaApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: SplitsaApp()));
 }

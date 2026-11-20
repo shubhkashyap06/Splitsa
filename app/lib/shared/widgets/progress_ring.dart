@@ -7,14 +7,13 @@ library;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_durations.dart';
 
 class ProgressRing extends StatefulWidget {
   const ProgressRing({
     super.key,
     required this.progress,
     this.size = 116.0,
-    this.color = AppColors.jade,
+    this.color,
     this.strokeWidth = 9.0,
     this.child,
   });
@@ -22,7 +21,7 @@ class ProgressRing extends StatefulWidget {
   /// 0–100
   final double progress;
   final double size;
-  final Color color;
+  final Color? color;
   final double strokeWidth;
   final Widget? child;
 
@@ -42,8 +41,10 @@ class _ProgressRingState extends State<ProgressRing>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _progress = Tween<double>(begin: 0, end: widget.progress.clamp(0, 100))
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut));
+    _progress = Tween<double>(
+      begin: 0,
+      end: widget.progress.clamp(0, 100),
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut));
     _ctrl.forward();
   }
 
@@ -51,8 +52,10 @@ class _ProgressRingState extends State<ProgressRing>
   void didUpdateWidget(ProgressRing old) {
     super.didUpdateWidget(old);
     if (old.progress != widget.progress) {
-      _progress = Tween<double>(begin: _progress.value, end: widget.progress.clamp(0, 100))
-          .animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut));
+      _progress = Tween<double>(
+        begin: _progress.value,
+        end: widget.progress.clamp(0, 100),
+      ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut));
       _ctrl
         ..reset()
         ..forward();
@@ -75,14 +78,12 @@ class _ProgressRingState extends State<ProgressRing>
         builder: (context, child) => CustomPaint(
           painter: _RingPainter(
             progress: _progress.value,
-            color: widget.color,
+            color: (widget.color ?? AppColors.jade),
             strokeWidth: widget.strokeWidth,
           ),
           child: child,
         ),
-        child: widget.child != null
-            ? Center(child: widget.child)
-            : null,
+        child: widget.child != null ? Center(child: widget.child) : null,
       ),
     );
   }
@@ -101,13 +102,13 @@ class _RingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center  = Offset(size.width / 2, size.height / 2);
-    final radius  = (size.width - strokeWidth) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
     const startAngle = -math.pi / 2; // 12 o'clock
 
     // Background track
     final trackPaint = Paint()
-      ..color = color.withOpacity(0.12)
+      ..color = color.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -138,7 +139,11 @@ class _RingPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
       canvas.drawCircle(Offset(sparkX, sparkY), strokeWidth * 0.6, sparkPaint);
       // Solid center on top of glow
-      canvas.drawCircle(Offset(sparkX, sparkY), strokeWidth * 0.35, Paint()..color = Colors.white);
+      canvas.drawCircle(
+        Offset(sparkX, sparkY),
+        strokeWidth * 0.35,
+        Paint()..color = Colors.white,
+      );
     }
   }
 

@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 import '../application/auth_provider.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -26,13 +27,10 @@ class AuthGate extends ConsumerWidget {
     });
 
     // Momentary splash while routing
-    return const Scaffold(
-      backgroundColor: Colors.black,
+    return Scaffold(
+      backgroundColor: AppColors.onBtn,
       body: Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFFF2A73B),
-          strokeWidth: 2,
-        ),
+        child: CircularProgressIndicator(color: AppColors.jade, strokeWidth: 2),
       ),
     );
   }

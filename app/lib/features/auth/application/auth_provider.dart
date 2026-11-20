@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:drift/drift.dart';
 import '../../../data/remote/supabase_service.dart';
 import '../../../data/local/database.dart';
+import '../../../data/repositories/account_repository.dart';
 
 part 'auth_provider.g.dart';
 
@@ -14,8 +15,7 @@ Stream<AuthState> authState(Ref ref) =>
     SupabaseService.client.auth.onAuthStateChange;
 
 @riverpod
-User? currentUser(Ref ref) =>
-    SupabaseService.client.auth.currentUser;
+User? currentUser(Ref ref) => SupabaseService.client.auth.currentUser;
 
 // ── Email OTP ─────────────────────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> signOut() async {
     state = const AsyncLoading();
     try {
-      await SupabaseService.client.auth.signOut();
+      await ref.read(accountRepositoryProvider).signOut();
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -78,15 +78,16 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _cacheProfile(User user) async {
     final db = ref.read(appDatabaseProvider);
-    await db.profileDao.upsertProfile(
+    await db.profileDao.insertIfAbsent(
       ProfilesTableCompanion.insert(
-        id:          user.id,
-        displayName: user.userMetadata?['display_name'] as String? ??
+        id: user.id,
+        displayName:
+            user.userMetadata?['display_name'] as String? ??
             user.email?.split('@').first ??
             'User',
-        email:       Value(user.email),
-        createdAt:   DateTime.now(),
-        updatedAt:   DateTime.now(),
+        email: Value(user.email),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
     );
   }

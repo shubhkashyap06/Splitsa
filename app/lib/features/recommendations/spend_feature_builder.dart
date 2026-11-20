@@ -21,8 +21,9 @@ class SpendFeatureBuilder {
     required List<PersonalExpensesTableData> personalExpenses,
     required List<ExpensesTableData> sharedExpenses,
     required List<ExpenseSplitsTableData> sharedSplits,
+    DateTime? now,
   }) {
-    final now = DateTime.now();
+    now ??= DateTime.now();
     final fourWeeksAgo = now.subtract(const Duration(days: 28));
 
     // Merge all expenses into a flat list of (category, amountPaise, createdAt)
@@ -30,11 +31,13 @@ class SpendFeatureBuilder {
 
     for (final pe in personalExpenses) {
       if (pe.deletedAt != null) continue;
-      allTransactions.add(_Transaction(
-        category: pe.category,
-        amountPaise: pe.amountPaise.toInt(),
-        createdAt: pe.createdAt,
-      ));
+      allTransactions.add(
+        _Transaction(
+          category: pe.category,
+          amountPaise: pe.amountPaise,
+          createdAt: pe.createdAt,
+        ),
+      );
     }
 
     // For shared expenses, use the user's split amount (what they actually owe)
@@ -43,15 +46,19 @@ class SpendFeatureBuilder {
       if (split.deletedAt != null) continue;
       final expense = expenseMap[split.expenseId];
       if (expense == null || expense.deletedAt != null) continue;
-      allTransactions.add(_Transaction(
-        category: expense.category,
-        amountPaise: split.amountPaise.toInt(),
-        createdAt: expense.createdAt,
-      ));
+      allTransactions.add(
+        _Transaction(
+          category: expense.category,
+          amountPaise: split.amountPaise,
+          createdAt: expense.createdAt,
+        ),
+      );
     }
 
     // Filter to last 4 weeks
-    final recent = allTransactions.where((t) => t.createdAt.isAfter(fourWeeksAgo)).toList();
+    final recent = allTransactions
+        .where((t) => t.createdAt.isAfter(fourWeeksAgo))
+        .toList();
 
     // Group by week (0 = current week, 1 = last week, etc.)
     final weekBuckets = <int, List<_Transaction>>{};
@@ -63,8 +70,13 @@ class SpendFeatureBuilder {
     // Determine total weeks of history
     final oldestTransaction = allTransactions.isEmpty
         ? now
-        : allTransactions.map((t) => t.createdAt).reduce((a, b) => a.isBefore(b) ? a : b);
-    final totalWeeksOfHistory = math.max(1, now.difference(oldestTransaction).inDays ~/ 7);
+        : allTransactions
+              .map((t) => t.createdAt)
+              .reduce((a, b) => a.isBefore(b) ? a : b);
+    final totalWeeksOfHistory = math.max(
+      1,
+      now.difference(oldestTransaction).inDays ~/ 7,
+    );
 
     // Rolling 4-week average by category
     final catTotals = <String, List<int>>{}; // category -> [week0, week1, ...]
@@ -87,32 +99,43 @@ class SpendFeatureBuilder {
     // Last week's actual by category
     final lastWeekActual = <String, int>{};
     for (final t in (weekBuckets[0] ?? <_Transaction>[])) {
-      lastWeekActual[t.category] = (lastWeekActual[t.category] ?? 0) + (t.amountPaise as int);
+      lastWeekActual[t.category] =
+          (lastWeekActual[t.category] ?? 0) + t.amountPaise;
     }
 
     // Weekend vs weekday spend
     int weekendSpend = 0;
     int weekdaySpend = 0;
     for (final t in recent) {
-      if (t.createdAt.weekday == DateTime.saturday || t.createdAt.weekday == DateTime.sunday) {
+      if (t.createdAt.weekday == DateTime.saturday ||
+          t.createdAt.weekday == DateTime.sunday) {
         weekendSpend += t.amountPaise;
       } else {
         weekdaySpend += t.amountPaise;
       }
     }
 
-    // Category shares
+    // Category totals + shares
     final totalSpend = recent.fold<int>(0, (s, t) => s + t.amountPaise);
+    final catSpend = <String, int>{};
+    for (final t in recent) {
+      catSpend[t.category] = (catSpend[t.category] ?? 0) + t.amountPaise;
+    }
     final categoryShares = <String, double>{};
     if (totalSpend > 0) {
-      final catSpend = <String, int>{};
-      for (final t in recent) {
-        catSpend[t.category] = (catSpend[t.category] ?? 0) + t.amountPaise;
-      }
       for (final entry in catSpend.entries) {
         categoryShares[entry.key] = entry.value / totalSpend;
       }
     }
+
+    // Weekly totals including fixed costs (spending summary)
+    final weeklyTotalsAll = [
+      for (int w = 0; w < 4; w++)
+        (weekBuckets[w] ?? const <_Transaction>[]).fold<int>(
+          0,
+          (s, t) => s + t.amountPaise,
+        ),
+    ];
 
     // Weekly totals excluding fixed costs
     final weeklyTotalsExclFixed = <int>[];
@@ -141,6 +164,8 @@ class SpendFeatureBuilder {
       weeklyTotalsExclFixed: weeklyTotalsExclFixed,
       maxSingleTransactionPaise: maxSingleTransaction,
       medianTransactionPaise: medianTransaction,
+      weeklyTotalsAll: weeklyTotalsAll,
+      categoryTotalsPaise: catSpend,
     );
   }
 }

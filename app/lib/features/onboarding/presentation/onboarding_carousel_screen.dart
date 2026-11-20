@@ -1,46 +1,54 @@
-/// Onboarding carousel — 3 slides with soft parallax between illustration
-/// and text, then a CTA to enter email.
+/// Onboarding — three calm, animated slides, then email sign-in.
 ///
-/// Ported from docs/UI_UX_SPEC.md §4 "Onboarding + Phone/OTP Auth".
-/// Auth method changed to email OTP (no SMS provider needed for dev).
-/// Visual pattern is identical: n-slide carousel → entry field → OTP boxes.
+/// Each slide has its own looping illustration (onboarding_illustration.dart)
+/// over slowly drifting colour glows; the illustration moves slower than the
+/// text when swiping (parallax). Works in Day and Night.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_durations.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/motion.dart';
+import '../../../shared/widgets/sheets.dart';
 import 'widgets/onboarding_illustration.dart';
 
 class OnboardingCarouselScreen extends StatefulWidget {
   const OnboardingCarouselScreen({super.key});
 
   @override
-  State<OnboardingCarouselScreen> createState() => _OnboardingCarouselScreenState();
+  State<OnboardingCarouselScreen> createState() =>
+      _OnboardingCarouselScreenState();
+}
+
+class _Slide {
+  const _Slide(this.title, this.body, this.type);
+  final String title;
+  final String body;
+  final IllustrationType type;
 }
 
 class _OnboardingCarouselScreenState extends State<OnboardingCarouselScreen> {
   final _pageController = PageController();
-  int _currentPage = 0;
+  int _page = 0;
 
   static const _slides = [
-    _OnboardingSlide(
-      title: 'Split without the awkward chat',
-      body: 'Add an expense, Splitsa divides it fairly — no more "who owes who" in a 3am group DM.',
-      illustrationType: IllustrationType.split,
+    _Slide(
+      'Split without the awkward chat',
+      'Add a bill, pick the room. Everyone sees their share instantly — no “who owes who” at 3am.',
+      IllustrationType.split,
     ),
-    _OnboardingSlide(
-      title: 'Settle in one tap',
-      body: 'Simplified balances. Pay via GPay, PhonePe, or Paytm — whatever works.',
-      illustrationType: IllustrationType.settle,
+    _Slide(
+      'Settle in one gentle swipe',
+      'Splitsa works out the fewest payments, then hands off to GPay, PhonePe or Paytm.',
+      IllustrationType.settle,
     ),
-    _OnboardingSlide(
-      title: 'Your potli learns your patterns',
-      body: 'Spots when you underspent, nudges you to save the difference — automatically.',
-      illustrationType: IllustrationType.save,
+    _Slide(
+      'Watch your potli grow',
+      'Spend less this week? We’ll nudge the difference into your savings. Calm, never pushy.',
+      IllustrationType.save,
     ),
   ];
 
@@ -50,142 +58,145 @@ class _OnboardingCarouselScreenState extends State<OnboardingCarouselScreen> {
     super.dispose();
   }
 
-  void _nextPage() {
-    if (_currentPage < _slides.length - 1) {
-      _pageController.nextPage(
-        duration: AppDurations.normal,
-        curve: AppCurves.springy,
-      );
-    } else {
+  void _goToSignIn() =>
       context.pushNamed('auth-otp', queryParameters: {'email': ''});
+
+  void _next() {
+    if (_page < _slides.length - 1) {
+      _pageController.nextPage(duration: Motion.slow, curve: Motion.settle);
+    } else {
+      _goToSignIn();
     }
   }
 
+  List<Color> get _glows => switch (_page) {
+    0 => [AppColors.glow, AppColors.lilacTint],
+    1 => [AppColors.glow, AppColors.skyTint],
+    _ => [AppColors.jadeTint, AppColors.glow],
+  };
+
   @override
   Widget build(BuildContext context) {
+    final glows = _glows;
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Skip button ────────────────────────────────────────────────
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => context.pushNamed('auth-otp', queryParameters: {'email': ''}),
-                child: Text('Skip', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-              ),
-            ),
-
-            // ── Slides with parallax ───────────────────────────────────────
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                itemCount: _slides.length,
-                itemBuilder: (context, index) {
-                  return AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      double offset = 0;
-                      if (_pageController.hasClients && _pageController.position.haveDimensions) {
-                        offset = (_pageController.page! - index).clamp(-1.0, 1.0);
-                      }
-                      // Parallax: illustration moves slower than text
-                      return _SlideContent(
-                        slide: _slides[index],
-                        parallaxOffset: offset * 60,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-
-            // ── Page dots ─────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_slides.length, (i) {
-                  return AnimatedContainer(
-                    duration: AppDurations.fast,
-                    curve: AppCurves.springy,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _currentPage == i ? 20 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _currentPage == i ? AppColors.marigold : AppColors.textTertiary,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                    ),
-                  );
-                }),
-              ),
-            ),
-
-            // ── CTA button ────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xxxl,
-              ),
-              child: _PrimaryButton(
-                label: _currentPage < _slides.length - 1 ? 'Next' : 'Get started',
-                onTap: _nextPage,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Sub-widgets ──────────────────────────────────────────────────────────────
-
-class _OnboardingSlide {
-  const _OnboardingSlide({
-    required this.title,
-    required this.body,
-    required this.illustrationType,
-  });
-  final String title;
-  final String body;
-  final IllustrationType illustrationType;
-}
-
-class _SlideContent extends StatelessWidget {
-  const _SlideContent({required this.slide, required this.parallaxOffset});
-  final _OnboardingSlide slide;
-  final double parallaxOffset;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          // Illustration moves at a different rate than text (parallax)
-          Transform.translate(
-            offset: Offset(parallaxOffset * 0.6, 0),
-            child: OnboardingIllustration(type: slide.illustrationType),
+          // Drifting glows that recolour per slide.
+          AnimatedPositioned(
+            duration: Motion.slow,
+            curve: Motion.settle,
+            top: -80,
+            left: _page.isEven ? -90 : -40,
+            child: _AnimatedGlow(color: glows[0], size: 300),
           ),
-          const SizedBox(height: AppSpacing.xxxl),
-          // Text moves at full page speed (no transform needed — it's in the PageView)
-          Transform.translate(
-            offset: Offset(parallaxOffset * -0.15, 0),
+          AnimatedPositioned(
+            duration: Motion.slow,
+            curve: Motion.settle,
+            top: 230,
+            right: _page == 1 ? -60 : -110,
+            child: _AnimatedGlow(color: glows[1], size: 260),
+          ),
+          SafeArea(
             child: Column(
               children: [
-                Text(
-                  slide.title,
-                  style: AppTextStyles.titleMedium,
-                  textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.sm,
+                    AppSpacing.sm,
+                    0,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: AppColors.jade,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.sentiment_satisfied_rounded,
+                          size: 18,
+                          color: AppColors.background,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('Splitsa', style: AppTextStyles.titleSmall),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _goToSignIn,
+                        child: Text(
+                          'Skip',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  slide.body,
-                  style: AppTextStyles.bodyMedium,
-                  textAlign: TextAlign.center,
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemCount: _slides.length,
+                    itemBuilder: (context, index) => AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, _) {
+                        var offset = 0.0;
+                        if (_pageController.hasClients &&
+                            _pageController.position.haveDimensions) {
+                          offset = (_pageController.page! - index).clamp(
+                            -1.0,
+                            1.0,
+                          );
+                        }
+                        return _SlideView(
+                          slide: _slides[index],
+                          parallax: offset * 60,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(_slides.length, (i) {
+                    final on = _page == i;
+                    return AnimatedContainer(
+                      duration: Motion.medium,
+                      curve: Motion.spring,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: on ? 28 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: on
+                            ? AppColors.textPrimary
+                            : AppColors.textPrimary.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    );
+                  }),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.xxl,
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: Motion.medium,
+                    child: PillButton(
+                      key: ValueKey(_page == _slides.length - 1),
+                      label: _page < _slides.length - 1
+                          ? 'Continue'
+                          : 'Let’s go',
+                      onPressed: _next,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -196,32 +207,73 @@ class _SlideContent extends StatelessWidget {
   }
 }
 
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({required this.label, required this.onTap});
-  final String label;
-  final VoidCallback onTap;
+class _AnimatedGlow extends StatelessWidget {
+  const _AnimatedGlow({required this.color, required this.size});
+  final Color color;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 1.0, end: 1.0),
-        duration: AppDurations.veryFast,
-        builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
-        child: Container(
-          width: double.infinity,
-          height: 56,
-          decoration: BoxDecoration(
-            color: AppColors.marigold,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(end: color),
+      duration: Motion.slow,
+      builder: (ctx, c, _) => GlowBlob(
+        color: c ?? color,
+        size: size,
+        opacity: AppColors.isNight ? 0.5 : 0.7,
+      ),
+    );
+  }
+}
+
+class _SlideView extends StatelessWidget {
+  const _SlideView({required this.slide, required this.parallax});
+  final _Slide slide;
+  final double parallax;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Center(
+              child: Transform.translate(
+                offset: Offset(parallax * 0.6, 0),
+                child: OnboardingIllustration(type: slide.type),
+              ),
+            ),
           ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppTextStyles.button.copyWith(color: AppColors.black),
+          Transform.translate(
+            offset: Offset(parallax * -0.15, 0),
+            child: RiseIn(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    slide.title,
+                    style: AppTextStyles.titleLarge.copyWith(
+                      fontSize: 32,
+                      height: 1.12,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    slide.body,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

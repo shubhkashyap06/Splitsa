@@ -21,8 +21,8 @@ abstract final class SupabaseService {
 
   static Future<void> init() async {
     await Supabase.initialize(
-      url:    AppConfig.instance.supabaseUrl,
-      anonKey: AppConfig.instance.supabasePublishableKey,
+      url: AppConfig.instance.supabaseUrl,
+      publishableKey: AppConfig.instance.supabasePublishableKey,
       authOptions: FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
         autoRefreshToken: true,

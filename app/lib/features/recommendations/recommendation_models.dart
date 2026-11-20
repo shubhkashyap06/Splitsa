@@ -33,6 +33,8 @@ class SpendFeatureData {
     required this.weeklyTotalsExclFixed,
     required this.maxSingleTransactionPaise,
     required this.medianTransactionPaise,
+    this.weeklyTotalsAll = const [],
+    this.categoryTotalsPaise = const {},
   });
 
   /// Rolling 4-week average spend per category, in paise.
@@ -62,9 +64,21 @@ class SpendFeatureData {
   /// User's own median transaction size, in paise.
   final int medianTransactionPaise;
 
+  /// Per-week totals INCLUDING fixed costs, index 0 = the last 7 days.
+  /// Feeds the spending summary so it reads the same computation as the
+  /// nudge (PRODUCT_LOGIC.md §4 — if they disagree, that's a bug).
+  final List<int> weeklyTotalsAll;
+
+  /// Per-category totals over the whole 4-week window, in paise.
+  final Map<String, int> categoryTotalsPaise;
+
   /// Fixed-cost category keys — excluded from volatility calculation.
   static const fixedCategories = {
-    'rent', 'electricity', 'wifi', 'subscriptions', 'gas',
+    'rent',
+    'electricity',
+    'wifi',
+    'subscriptions',
+    'gas',
   };
 
   /// Weekend/weekday ratio. > 0.6 → weekendSpender persona.
@@ -74,20 +88,21 @@ class SpendFeatureData {
   /// Standard deviation of weekly totals (excl. fixed costs).
   double get spendVolatility {
     if (weeklyTotalsExclFixed.isEmpty) return 0;
-    final mean = weeklyTotalsExclFixed.reduce((a, b) => a + b) /
+    final mean =
+        weeklyTotalsExclFixed.reduce((a, b) => a + b) /
         weeklyTotalsExclFixed.length;
-    final variance = weeklyTotalsExclFixed
-        .map((t) => (t - mean) * (t - mean))
-        .reduce((a, b) => a + b) /
+    final variance =
+        weeklyTotalsExclFixed
+            .map((t) => (t - mean) * (t - mean))
+            .reduce((a, b) => a + b) /
         weeklyTotalsExclFixed.length;
     return variance > 0 ? variance.sqrt() : 0;
   }
 
   /// Ratio of largest single transaction to user's own median.
-  double get maxToMedianRatio =>
-      medianTransactionPaise == 0
-          ? 0
-          : maxSingleTransactionPaise / medianTransactionPaise;
+  double get maxToMedianRatio => medianTransactionPaise == 0
+      ? 0
+      : maxSingleTransactionPaise / medianTransactionPaise;
 
   int get totalActualPaise =>
       lastWeekActualPaiseByCategory.values.fold(0, (s, v) => s + v);
@@ -98,10 +113,9 @@ class SpendFeatureData {
   /// Surplus this week: positive = underspent vs. rolling average.
   int get surplusPaise => totalAvgPaise - totalActualPaise;
 
-  double get fixedCostShare =>
-      categoryShares.entries
-          .where((e) => fixedCategories.contains(e.key))
-          .fold(0.0, (s, e) => s + e.value);
+  double get fixedCostShare => categoryShares.entries
+      .where((e) => fixedCategories.contains(e.key))
+      .fold(0.0, (s, e) => s + e.value);
 }
 
 extension on double {

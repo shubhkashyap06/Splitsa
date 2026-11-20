@@ -7,7 +7,7 @@ part of 'recommendation_provider.dart';
 // **************************************************************************
 
 String _$recommendationEngineHash() =>
-    r'e9b507b9306919497b45bc0f42d2710ab399b2e3';
+    r'b88a72c914ce5d505bea6ab8ccb54dc38ddea225';
 
 /// Provides the active [RecommendationEngine] implementation.
 ///

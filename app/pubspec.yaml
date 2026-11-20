@@ -35,6 +35,9 @@ dependencies:
 
   # ── Utilities ──────────────────────────────────────────────────────────────
   uuid: ^4.5.1                # UUIDv7 generation
+  http: ^1.2.2                # ClientException classification in RemoteGateway
+  google_fonts: ^6.3.3        # Plus Jakarta Sans (cached after first fetch)
+  shared_preferences: ^2.5.3  # per-device appearance setting (Day/Night/System)
   flutter_secure_storage: ^9.2.2
   intl: ^0.20.1               # number/date formatting (₹ amounts)
   url_launcher: ^6.3.1        # UPI deep links + external URLs

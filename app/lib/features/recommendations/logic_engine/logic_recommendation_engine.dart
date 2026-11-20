@@ -44,7 +44,7 @@ class LogicRecommendationEngine implements RecommendationEngine {
     final meanWeeklyExclFixed = features.weeklyTotalsExclFixed.isEmpty
         ? 0
         : features.weeklyTotalsExclFixed.reduce((a, b) => a + b) ~/
-            features.weeklyTotalsExclFixed.length;
+              features.weeklyTotalsExclFixed.length;
     final volatilityPct = meanWeeklyExclFixed == 0
         ? 0
         : features.spendVolatility / meanWeeklyExclFixed;
@@ -58,22 +58,34 @@ class LogicRecommendationEngine implements RecommendationEngine {
 
   @override
   Future<SavingsNudge?> generateNudge(SpendFeatureData features) async {
-    // No nudge for cold-start users
-    if (features.totalWeeksOfHistory < kColdStartWeeks) return null;
-
-    final surplus = features.surplusPaise;
+    // Cold start (< 4 weeks): PRODUCT_LOGIC.md §3 — compare this week to the
+    // user's typical week so far (mean of prior non-empty weeks) instead of a
+    // per-category rolling average. Still a real nudge, not a locked card.
+    final int surplus;
+    if (features.totalWeeksOfHistory < kColdStartWeeks) {
+      final weeks = features.weeklyTotalsAll;
+      final prior = weeks.skip(1).where((w) => w > 0).toList();
+      if (weeks.isEmpty || prior.isEmpty) return null; // nothing to compare yet
+      final typical = prior.reduce((a, b) => a + b) ~/ prior.length;
+      surplus = typical - weeks.first;
+    } else {
+      surplus = features.surplusPaise;
+    }
     if (surplus < kNudgeFloorPaise) return null; // < ₹200 — not actionable
 
-    final recommended = (surplus * kSavingsSafetyFraction).round();
+    // Rounded to the nearest ₹10 — "move ₹2,550" reads as advice,
+    // "move ₹2,547.70" reads as a spreadsheet.
+    final recommended =
+        ((surplus * kSavingsSafetyFraction) / 1000).round() * 1000;
     final persona = await classifyPersona(features);
 
     // Find the category with the biggest underspend this week
     String topSurplusCategory = 'other';
     int topSurplusAmount = 0;
     for (final entry in features.rolling4wAvgPaiseByCategory.entries) {
-      final avg    = entry.value;
+      final avg = entry.value;
       final actual = features.lastWeekActualPaiseByCategory[entry.key] ?? 0;
-      final diff   = avg - actual;
+      final diff = avg - actual;
       if (diff > topSurplusAmount) {
         topSurplusAmount = diff;
         topSurplusCategory = entry.key;
@@ -83,17 +95,21 @@ class LogicRecommendationEngine implements RecommendationEngine {
     final copy = _nudgeCopy(persona, topSurplusCategory, recommended);
     return SavingsNudge(
       recommendedAmountPaise: recommended,
-      headline:               copy.headline,
-      subtext:                copy.subtext,
-      persona:                persona,
-      targetCategory:         topSurplusCategory,
+      headline: copy.headline,
+      subtext: copy.subtext,
+      persona: persona,
+      targetCategory: topSurplusCategory,
     );
   }
 
   @override
-  Future<SpendingSummary> computeSpendingSummary(SpendFeatureData features) async {
-    final byCategory = Map<String, int>.from(features.lastWeekActualPaiseByCategory);
-    final total      = byCategory.values.fold(0, (s, v) => s + v);
+  Future<SpendingSummary> computeSpendingSummary(
+    SpendFeatureData features,
+  ) async {
+    final byCategory = Map<String, int>.from(
+      features.lastWeekActualPaiseByCategory,
+    );
+    final total = byCategory.values.fold(0, (s, v) => s + v);
 
     String topCategory = 'other';
     int topAmount = 0;
@@ -105,15 +121,13 @@ class LogicRecommendationEngine implements RecommendationEngine {
     }
 
     final avgTotal = features.totalAvgPaise;
-    final vsLastPct = avgTotal == 0
-        ? 0.0
-        : (total - avgTotal) / avgTotal;
+    final vsLastPct = avgTotal == 0 ? 0.0 : (total - avgTotal) / avgTotal;
 
     return SpendingSummary(
-      totalPaise:      total,
-      byCategory:      byCategory,
-      weeklyTrend:     features.weeklyTotalsExclFixed,
-      topCategory:     topCategory,
+      totalPaise: total,
+      byCategory: byCategory,
+      weeklyTrend: features.weeklyTotalsExclFixed,
+      topCategory: topCategory,
       vsLastPeriodPct: vsLastPct,
     );
   }
@@ -159,12 +173,12 @@ class LogicRecommendationEngine implements RecommendationEngine {
   }
 
   String _categoryName(String key) => switch (key) {
-    'food'          => 'food',
-    'travel'        => 'travel',
+    'food' => 'food',
+    'travel' => 'travel',
     'entertainment' => 'entertainment',
-    'home'          => 'home expenses',
-    'health'        => 'health',
-    'shopping'      => 'shopping',
-    _               => 'spending',
+    'home' => 'home expenses',
+    'health' => 'health',
+    'shopping' => 'shopping',
+    _ => 'spending',
   };
 }

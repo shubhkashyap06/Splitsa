@@ -10,14 +10,14 @@ class SplitsaAvatar extends StatelessWidget {
   const SplitsaAvatar({
     super.key,
     required this.name,
-    this.tone = AppColors.textSecondary,
+    this.tone,
     this.size = 44.0,
     this.ring = false,
     this.ringColor,
   });
 
   final String name;
-  final Color tone;
+  final Color? tone;
   final double size;
 
   /// Whether to render the double-ring focus indicator (active selection).
@@ -25,15 +25,22 @@ class SplitsaAvatar extends StatelessWidget {
   final Color? ringColor;
 
   String get _initials {
-    final parts = name.trim().split(' ');
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+    final only = parts.first;
+    return only.substring(0, only.length >= 2 ? 2 : 1).toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
+    final tone = this.tone ?? AppColors.textSecondary;
     Widget child = Container(
       width: size,
       height: size,
@@ -46,9 +53,13 @@ class SplitsaAvatar extends StatelessWidget {
         ),
         boxShadow: ring
             ? [
-                BoxShadow(color: AppColors.background, spreadRadius: 2, blurRadius: 0),
                 BoxShadow(
-                  color: (ringColor ?? tone).withOpacity(0.4),
+                  color: AppColors.background,
+                  spreadRadius: 2,
+                  blurRadius: 0,
+                ),
+                BoxShadow(
+                  color: (ringColor ?? tone).withValues(alpha: 0.4),
                   spreadRadius: 3.5,
                   blurRadius: 0,
                 ),
@@ -90,8 +101,11 @@ class AvatarStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showCount = names.length.clamp(0, maxVisible);
-    final overflow  = names.length - showCount;
-    final totalWidth = size + (showCount - 1) * (size * 0.55) + (overflow > 0 ? size * 0.55 : 0);
+    final overflow = names.length - showCount;
+    final totalWidth =
+        size +
+        (showCount - 1) * (size * 0.55) +
+        (overflow > 0 ? size * 0.55 : 0);
 
     return SizedBox(
       width: totalWidth,
@@ -112,7 +126,8 @@ class AvatarStack extends StatelessWidget {
             Positioned(
               left: showCount * size * 0.55,
               child: Container(
-                width: size, height: size,
+                width: size,
+                height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.card,

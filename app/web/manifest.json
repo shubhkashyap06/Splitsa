@@ -1,11 +1,11 @@
 {
-    "name": "splitsa",
-    "short_name": "splitsa",
+    "name": "Splitsa",
+    "short_name": "Splitsa",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "description": "Split bills with flatmates, settle over UPI, and save the difference.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
@@ -30,6 +30,41 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Split an expense",
+            "short_name": "Split",
+            "url": "./#/quick-add?type=split",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Log a personal spend",
+            "short_name": "Personal",
+            "url": "./#/quick-add?type=personal",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Add money to a Pot",
+            "short_name": "Pot",
+            "url": "./#/quick-add?type=pot-contribution",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

@@ -53,7 +53,7 @@ abstract final class DebtSimplifier {
 
     // Build mutable lists of (userId, amount) for creditors and debtors
     final creditors = <({String id, int amount})>[];
-    final debtors   = <({String id, int amount})>[];
+    final debtors = <({String id, int amount})>[];
 
     for (final entry in balances.entries) {
       if (entry.value > tolerancePaise) {
@@ -72,26 +72,28 @@ abstract final class DebtSimplifier {
     // Greedy matching
     int ci = 0, di = 0;
     final creditAmounts = creditors.map((c) => c.amount).toList();
-    final debtAmounts   = debtors.map((d) => d.amount).toList();
+    final debtAmounts = debtors.map((d) => d.amount).toList();
 
     while (ci < creditors.length && di < debtors.length) {
       final credit = creditAmounts[ci];
-      final debt   = debtAmounts[di];
+      final debt = debtAmounts[di];
       final amount = credit < debt ? credit : debt;
 
       if (amount > tolerancePaise) {
-        settlements.add(Settlement(
-          payerId:     debtors[di].id,
-          payeeId:     creditors[ci].id,
-          amountPaise: amount,
-        ));
+        settlements.add(
+          Settlement(
+            payerId: debtors[di].id,
+            payeeId: creditors[ci].id,
+            amountPaise: amount,
+          ),
+        );
       }
 
       creditAmounts[ci] -= amount;
-      debtAmounts[di]   -= amount;
+      debtAmounts[di] -= amount;
 
       if (creditAmounts[ci] <= tolerancePaise) ci++;
-      if (debtAmounts[di]   <= tolerancePaise) di++;
+      if (debtAmounts[di] <= tolerancePaise) di++;
     }
 
     return settlements;

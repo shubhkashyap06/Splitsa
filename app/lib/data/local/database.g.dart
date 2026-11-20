@@ -95,6 +95,16 @@ class $ProfilesTableTable extends ProfilesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _monthlyBudgetPaiseMeta =
+      const VerificationMeta('monthlyBudgetPaise');
+  @override
+  late final GeneratedColumn<int> monthlyBudgetPaise = GeneratedColumn<int>(
+    'monthly_budget_paise',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -138,6 +148,7 @@ class $ProfilesTableTable extends ProfilesTable
     notificationsRegularEnabled,
     quietHoursStart,
     quietHoursEnd,
+    monthlyBudgetPaise,
     createdAt,
     updatedAt,
     deletedAt,
@@ -215,6 +226,15 @@ class $ProfilesTableTable extends ProfilesTable
         ),
       );
     }
+    if (data.containsKey('monthly_budget_paise')) {
+      context.handle(
+        _monthlyBudgetPaiseMeta,
+        monthlyBudgetPaise.isAcceptableOrUnknown(
+          data['monthly_budget_paise']!,
+          _monthlyBudgetPaiseMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -278,6 +298,10 @@ class $ProfilesTableTable extends ProfilesTable
         DriftSqlType.string,
         data['${effectivePrefix}quiet_hours_end'],
       ),
+      monthlyBudgetPaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}monthly_budget_paise'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -309,6 +333,9 @@ class ProfilesTableData extends DataClass
   final bool notificationsRegularEnabled;
   final String? quietHoursStart;
   final String? quietHoursEnd;
+
+  /// Monthly budget for the Home hero card. Null = not set yet.
+  final int? monthlyBudgetPaise;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -321,6 +348,7 @@ class ProfilesTableData extends DataClass
     required this.notificationsRegularEnabled,
     this.quietHoursStart,
     this.quietHoursEnd,
+    this.monthlyBudgetPaise,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -347,6 +375,9 @@ class ProfilesTableData extends DataClass
     }
     if (!nullToAbsent || quietHoursEnd != null) {
       map['quiet_hours_end'] = Variable<String>(quietHoursEnd);
+    }
+    if (!nullToAbsent || monthlyBudgetPaise != null) {
+      map['monthly_budget_paise'] = Variable<int>(monthlyBudgetPaise);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -376,6 +407,9 @@ class ProfilesTableData extends DataClass
       quietHoursEnd: quietHoursEnd == null && nullToAbsent
           ? const Value.absent()
           : Value(quietHoursEnd),
+      monthlyBudgetPaise: monthlyBudgetPaise == null && nullToAbsent
+          ? const Value.absent()
+          : Value(monthlyBudgetPaise),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -400,6 +434,7 @@ class ProfilesTableData extends DataClass
       ),
       quietHoursStart: serializer.fromJson<String?>(json['quietHoursStart']),
       quietHoursEnd: serializer.fromJson<String?>(json['quietHoursEnd']),
+      monthlyBudgetPaise: serializer.fromJson<int?>(json['monthlyBudgetPaise']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -419,6 +454,7 @@ class ProfilesTableData extends DataClass
       ),
       'quietHoursStart': serializer.toJson<String?>(quietHoursStart),
       'quietHoursEnd': serializer.toJson<String?>(quietHoursEnd),
+      'monthlyBudgetPaise': serializer.toJson<int?>(monthlyBudgetPaise),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -434,6 +470,7 @@ class ProfilesTableData extends DataClass
     bool? notificationsRegularEnabled,
     Value<String?> quietHoursStart = const Value.absent(),
     Value<String?> quietHoursEnd = const Value.absent(),
+    Value<int?> monthlyBudgetPaise = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -451,6 +488,9 @@ class ProfilesTableData extends DataClass
     quietHoursEnd: quietHoursEnd.present
         ? quietHoursEnd.value
         : this.quietHoursEnd,
+    monthlyBudgetPaise: monthlyBudgetPaise.present
+        ? monthlyBudgetPaise.value
+        : this.monthlyBudgetPaise,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -473,6 +513,9 @@ class ProfilesTableData extends DataClass
       quietHoursEnd: data.quietHoursEnd.present
           ? data.quietHoursEnd.value
           : this.quietHoursEnd,
+      monthlyBudgetPaise: data.monthlyBudgetPaise.present
+          ? data.monthlyBudgetPaise.value
+          : this.monthlyBudgetPaise,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -490,6 +533,7 @@ class ProfilesTableData extends DataClass
           ..write('notificationsRegularEnabled: $notificationsRegularEnabled, ')
           ..write('quietHoursStart: $quietHoursStart, ')
           ..write('quietHoursEnd: $quietHoursEnd, ')
+          ..write('monthlyBudgetPaise: $monthlyBudgetPaise, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -507,6 +551,7 @@ class ProfilesTableData extends DataClass
     notificationsRegularEnabled,
     quietHoursStart,
     quietHoursEnd,
+    monthlyBudgetPaise,
     createdAt,
     updatedAt,
     deletedAt,
@@ -524,6 +569,7 @@ class ProfilesTableData extends DataClass
               this.notificationsRegularEnabled &&
           other.quietHoursStart == this.quietHoursStart &&
           other.quietHoursEnd == this.quietHoursEnd &&
+          other.monthlyBudgetPaise == this.monthlyBudgetPaise &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -538,6 +584,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
   final Value<bool> notificationsRegularEnabled;
   final Value<String?> quietHoursStart;
   final Value<String?> quietHoursEnd;
+  final Value<int?> monthlyBudgetPaise;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -551,6 +598,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
     this.notificationsRegularEnabled = const Value.absent(),
     this.quietHoursStart = const Value.absent(),
     this.quietHoursEnd = const Value.absent(),
+    this.monthlyBudgetPaise = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -565,6 +613,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
     this.notificationsRegularEnabled = const Value.absent(),
     this.quietHoursStart = const Value.absent(),
     this.quietHoursEnd = const Value.absent(),
+    this.monthlyBudgetPaise = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -582,6 +631,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
     Expression<bool>? notificationsRegularEnabled,
     Expression<String>? quietHoursStart,
     Expression<String>? quietHoursEnd,
+    Expression<int>? monthlyBudgetPaise,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -597,6 +647,8 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
         'notifications_regular_enabled': notificationsRegularEnabled,
       if (quietHoursStart != null) 'quiet_hours_start': quietHoursStart,
       if (quietHoursEnd != null) 'quiet_hours_end': quietHoursEnd,
+      if (monthlyBudgetPaise != null)
+        'monthly_budget_paise': monthlyBudgetPaise,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -613,6 +665,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
     Value<bool>? notificationsRegularEnabled,
     Value<String?>? quietHoursStart,
     Value<String?>? quietHoursEnd,
+    Value<int?>? monthlyBudgetPaise,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -628,6 +681,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
           notificationsRegularEnabled ?? this.notificationsRegularEnabled,
       quietHoursStart: quietHoursStart ?? this.quietHoursStart,
       quietHoursEnd: quietHoursEnd ?? this.quietHoursEnd,
+      monthlyBudgetPaise: monthlyBudgetPaise ?? this.monthlyBudgetPaise,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -664,6 +718,9 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
     if (quietHoursEnd.present) {
       map['quiet_hours_end'] = Variable<String>(quietHoursEnd.value);
     }
+    if (monthlyBudgetPaise.present) {
+      map['monthly_budget_paise'] = Variable<int>(monthlyBudgetPaise.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -690,6 +747,7 @@ class ProfilesTableCompanion extends UpdateCompanion<ProfilesTableData> {
           ..write('notificationsRegularEnabled: $notificationsRegularEnabled, ')
           ..write('quietHoursStart: $quietHoursStart, ')
           ..write('quietHoursEnd: $quietHoursEnd, ')
+          ..write('monthlyBudgetPaise: $monthlyBudgetPaise, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2344,11 +2402,11 @@ class $ExpensesTableTable extends ExpensesTable
     'amountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> amountPaise = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> amountPaise = GeneratedColumn<int>(
     'amount_paise',
     aliasedName,
     false,
-    type: DriftSqlType.bigInt,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _categoryMeta = const VerificationMeta(
@@ -2557,7 +2615,7 @@ class $ExpensesTableTable extends ExpensesTable
         data['${effectivePrefix}description'],
       )!,
       amountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paise'],
       )!,
       category: attachedDatabase.typeMapping.read(
@@ -2599,7 +2657,7 @@ class ExpensesTableData extends DataClass
   final String roomId;
   final String paidBy;
   final String description;
-  final BigInt amountPaise;
+  final int amountPaise;
   final String category;
   final String? subCategory;
   final String splitMode;
@@ -2626,7 +2684,7 @@ class ExpensesTableData extends DataClass
     map['room_id'] = Variable<String>(roomId);
     map['paid_by'] = Variable<String>(paidBy);
     map['description'] = Variable<String>(description);
-    map['amount_paise'] = Variable<BigInt>(amountPaise);
+    map['amount_paise'] = Variable<int>(amountPaise);
     map['category'] = Variable<String>(category);
     if (!nullToAbsent || subCategory != null) {
       map['sub_category'] = Variable<String>(subCategory);
@@ -2670,7 +2728,7 @@ class ExpensesTableData extends DataClass
       roomId: serializer.fromJson<String>(json['roomId']),
       paidBy: serializer.fromJson<String>(json['paidBy']),
       description: serializer.fromJson<String>(json['description']),
-      amountPaise: serializer.fromJson<BigInt>(json['amountPaise']),
+      amountPaise: serializer.fromJson<int>(json['amountPaise']),
       category: serializer.fromJson<String>(json['category']),
       subCategory: serializer.fromJson<String?>(json['subCategory']),
       splitMode: serializer.fromJson<String>(json['splitMode']),
@@ -2687,7 +2745,7 @@ class ExpensesTableData extends DataClass
       'roomId': serializer.toJson<String>(roomId),
       'paidBy': serializer.toJson<String>(paidBy),
       'description': serializer.toJson<String>(description),
-      'amountPaise': serializer.toJson<BigInt>(amountPaise),
+      'amountPaise': serializer.toJson<int>(amountPaise),
       'category': serializer.toJson<String>(category),
       'subCategory': serializer.toJson<String?>(subCategory),
       'splitMode': serializer.toJson<String>(splitMode),
@@ -2702,7 +2760,7 @@ class ExpensesTableData extends DataClass
     String? roomId,
     String? paidBy,
     String? description,
-    BigInt? amountPaise,
+    int? amountPaise,
     String? category,
     Value<String?> subCategory = const Value.absent(),
     String? splitMode,
@@ -2798,7 +2856,7 @@ class ExpensesTableCompanion extends UpdateCompanion<ExpensesTableData> {
   final Value<String> roomId;
   final Value<String> paidBy;
   final Value<String> description;
-  final Value<BigInt> amountPaise;
+  final Value<int> amountPaise;
   final Value<String> category;
   final Value<String?> subCategory;
   final Value<String> splitMode;
@@ -2825,7 +2883,7 @@ class ExpensesTableCompanion extends UpdateCompanion<ExpensesTableData> {
     required String roomId,
     required String paidBy,
     required String description,
-    required BigInt amountPaise,
+    required int amountPaise,
     this.category = const Value.absent(),
     this.subCategory = const Value.absent(),
     this.splitMode = const Value.absent(),
@@ -2845,7 +2903,7 @@ class ExpensesTableCompanion extends UpdateCompanion<ExpensesTableData> {
     Expression<String>? roomId,
     Expression<String>? paidBy,
     Expression<String>? description,
-    Expression<BigInt>? amountPaise,
+    Expression<int>? amountPaise,
     Expression<String>? category,
     Expression<String>? subCategory,
     Expression<String>? splitMode,
@@ -2875,7 +2933,7 @@ class ExpensesTableCompanion extends UpdateCompanion<ExpensesTableData> {
     Value<String>? roomId,
     Value<String>? paidBy,
     Value<String>? description,
-    Value<BigInt>? amountPaise,
+    Value<int>? amountPaise,
     Value<String>? category,
     Value<String?>? subCategory,
     Value<String>? splitMode,
@@ -2916,7 +2974,7 @@ class ExpensesTableCompanion extends UpdateCompanion<ExpensesTableData> {
       map['description'] = Variable<String>(description.value);
     }
     if (amountPaise.present) {
-      map['amount_paise'] = Variable<BigInt>(amountPaise.value);
+      map['amount_paise'] = Variable<int>(amountPaise.value);
     }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
@@ -3007,11 +3065,11 @@ class $ExpenseSplitsTableTable extends ExpenseSplitsTable
     'amountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> amountPaise = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> amountPaise = GeneratedColumn<int>(
     'amount_paise',
     aliasedName,
     false,
-    type: DriftSqlType.bigInt,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -3145,7 +3203,7 @@ class $ExpenseSplitsTableTable extends ExpenseSplitsTable
         data['${effectivePrefix}user_id'],
       )!,
       amountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paise'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
@@ -3174,7 +3232,7 @@ class ExpenseSplitsTableData extends DataClass
   final String id;
   final String expenseId;
   final String userId;
-  final BigInt amountPaise;
+  final int amountPaise;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -3193,7 +3251,7 @@ class ExpenseSplitsTableData extends DataClass
     map['id'] = Variable<String>(id);
     map['expense_id'] = Variable<String>(expenseId);
     map['user_id'] = Variable<String>(userId);
-    map['amount_paise'] = Variable<BigInt>(amountPaise);
+    map['amount_paise'] = Variable<int>(amountPaise);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -3225,7 +3283,7 @@ class ExpenseSplitsTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       expenseId: serializer.fromJson<String>(json['expenseId']),
       userId: serializer.fromJson<String>(json['userId']),
-      amountPaise: serializer.fromJson<BigInt>(json['amountPaise']),
+      amountPaise: serializer.fromJson<int>(json['amountPaise']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -3238,7 +3296,7 @@ class ExpenseSplitsTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'expenseId': serializer.toJson<String>(expenseId),
       'userId': serializer.toJson<String>(userId),
-      'amountPaise': serializer.toJson<BigInt>(amountPaise),
+      'amountPaise': serializer.toJson<int>(amountPaise),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -3249,7 +3307,7 @@ class ExpenseSplitsTableData extends DataClass
     String? id,
     String? expenseId,
     String? userId,
-    BigInt? amountPaise,
+    int? amountPaise,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -3318,7 +3376,7 @@ class ExpenseSplitsTableCompanion
   final Value<String> id;
   final Value<String> expenseId;
   final Value<String> userId;
-  final Value<BigInt> amountPaise;
+  final Value<int> amountPaise;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -3337,7 +3395,7 @@ class ExpenseSplitsTableCompanion
     required String id,
     required String expenseId,
     required String userId,
-    required BigInt amountPaise,
+    required int amountPaise,
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -3352,7 +3410,7 @@ class ExpenseSplitsTableCompanion
     Expression<String>? id,
     Expression<String>? expenseId,
     Expression<String>? userId,
-    Expression<BigInt>? amountPaise,
+    Expression<int>? amountPaise,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -3374,7 +3432,7 @@ class ExpenseSplitsTableCompanion
     Value<String>? id,
     Value<String>? expenseId,
     Value<String>? userId,
-    Value<BigInt>? amountPaise,
+    Value<int>? amountPaise,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -3405,7 +3463,7 @@ class ExpenseSplitsTableCompanion
       map['user_id'] = Variable<String>(userId.value);
     }
     if (amountPaise.present) {
-      map['amount_paise'] = Variable<BigInt>(amountPaise.value);
+      map['amount_paise'] = Variable<int>(amountPaise.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3480,11 +3538,11 @@ class $PersonalExpensesTableTable extends PersonalExpensesTable
     'amountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> amountPaise = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> amountPaise = GeneratedColumn<int>(
     'amount_paise',
     aliasedName,
     false,
-    type: DriftSqlType.bigInt,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _categoryMeta = const VerificationMeta(
@@ -3664,7 +3722,7 @@ class $PersonalExpensesTableTable extends PersonalExpensesTable
         data['${effectivePrefix}description'],
       )!,
       amountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paise'],
       )!,
       category: attachedDatabase.typeMapping.read(
@@ -3701,7 +3759,7 @@ class PersonalExpensesTableData extends DataClass
   final String id;
   final String userId;
   final String description;
-  final BigInt amountPaise;
+  final int amountPaise;
   final String category;
   final String? subCategory;
   final DateTime createdAt;
@@ -3724,7 +3782,7 @@ class PersonalExpensesTableData extends DataClass
     map['id'] = Variable<String>(id);
     map['user_id'] = Variable<String>(userId);
     map['description'] = Variable<String>(description);
-    map['amount_paise'] = Variable<BigInt>(amountPaise);
+    map['amount_paise'] = Variable<int>(amountPaise);
     map['category'] = Variable<String>(category);
     if (!nullToAbsent || subCategory != null) {
       map['sub_category'] = Variable<String>(subCategory);
@@ -3764,7 +3822,7 @@ class PersonalExpensesTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
       description: serializer.fromJson<String>(json['description']),
-      amountPaise: serializer.fromJson<BigInt>(json['amountPaise']),
+      amountPaise: serializer.fromJson<int>(json['amountPaise']),
       category: serializer.fromJson<String>(json['category']),
       subCategory: serializer.fromJson<String?>(json['subCategory']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -3779,7 +3837,7 @@ class PersonalExpensesTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
       'description': serializer.toJson<String>(description),
-      'amountPaise': serializer.toJson<BigInt>(amountPaise),
+      'amountPaise': serializer.toJson<int>(amountPaise),
       'category': serializer.toJson<String>(category),
       'subCategory': serializer.toJson<String?>(subCategory),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -3792,7 +3850,7 @@ class PersonalExpensesTableData extends DataClass
     String? id,
     String? userId,
     String? description,
-    BigInt? amountPaise,
+    int? amountPaise,
     String? category,
     Value<String?> subCategory = const Value.absent(),
     DateTime? createdAt,
@@ -3879,7 +3937,7 @@ class PersonalExpensesTableCompanion
   final Value<String> id;
   final Value<String> userId;
   final Value<String> description;
-  final Value<BigInt> amountPaise;
+  final Value<int> amountPaise;
   final Value<String> category;
   final Value<String?> subCategory;
   final Value<DateTime> createdAt;
@@ -3902,7 +3960,7 @@ class PersonalExpensesTableCompanion
     required String id,
     required String userId,
     required String description,
-    required BigInt amountPaise,
+    required int amountPaise,
     this.category = const Value.absent(),
     this.subCategory = const Value.absent(),
     required DateTime createdAt,
@@ -3919,7 +3977,7 @@ class PersonalExpensesTableCompanion
     Expression<String>? id,
     Expression<String>? userId,
     Expression<String>? description,
-    Expression<BigInt>? amountPaise,
+    Expression<int>? amountPaise,
     Expression<String>? category,
     Expression<String>? subCategory,
     Expression<DateTime>? createdAt,
@@ -3945,7 +4003,7 @@ class PersonalExpensesTableCompanion
     Value<String>? id,
     Value<String>? userId,
     Value<String>? description,
-    Value<BigInt>? amountPaise,
+    Value<int>? amountPaise,
     Value<String>? category,
     Value<String?>? subCategory,
     Value<DateTime>? createdAt,
@@ -3980,7 +4038,7 @@ class PersonalExpensesTableCompanion
       map['description'] = Variable<String>(description.value);
     }
     if (amountPaise.present) {
-      map['amount_paise'] = Variable<BigInt>(amountPaise.value);
+      map['amount_paise'] = Variable<int>(amountPaise.value);
     }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
@@ -4080,11 +4138,11 @@ class $SettlementsTableTable extends SettlementsTable
     'amountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> amountPaise = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> amountPaise = GeneratedColumn<int>(
     'amount_paise',
     aliasedName,
     false,
-    type: DriftSqlType.bigInt,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -4231,7 +4289,7 @@ class $SettlementsTableTable extends SettlementsTable
         data['${effectivePrefix}payee_id'],
       )!,
       amountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paise'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
@@ -4261,7 +4319,7 @@ class SettlementsTableData extends DataClass
   final String roomId;
   final String payerId;
   final String payeeId;
-  final BigInt amountPaise;
+  final int amountPaise;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -4282,7 +4340,7 @@ class SettlementsTableData extends DataClass
     map['room_id'] = Variable<String>(roomId);
     map['payer_id'] = Variable<String>(payerId);
     map['payee_id'] = Variable<String>(payeeId);
-    map['amount_paise'] = Variable<BigInt>(amountPaise);
+    map['amount_paise'] = Variable<int>(amountPaise);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -4316,7 +4374,7 @@ class SettlementsTableData extends DataClass
       roomId: serializer.fromJson<String>(json['roomId']),
       payerId: serializer.fromJson<String>(json['payerId']),
       payeeId: serializer.fromJson<String>(json['payeeId']),
-      amountPaise: serializer.fromJson<BigInt>(json['amountPaise']),
+      amountPaise: serializer.fromJson<int>(json['amountPaise']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -4330,7 +4388,7 @@ class SettlementsTableData extends DataClass
       'roomId': serializer.toJson<String>(roomId),
       'payerId': serializer.toJson<String>(payerId),
       'payeeId': serializer.toJson<String>(payeeId),
-      'amountPaise': serializer.toJson<BigInt>(amountPaise),
+      'amountPaise': serializer.toJson<int>(amountPaise),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -4342,7 +4400,7 @@ class SettlementsTableData extends DataClass
     String? roomId,
     String? payerId,
     String? payeeId,
-    BigInt? amountPaise,
+    int? amountPaise,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -4416,7 +4474,7 @@ class SettlementsTableCompanion extends UpdateCompanion<SettlementsTableData> {
   final Value<String> roomId;
   final Value<String> payerId;
   final Value<String> payeeId;
-  final Value<BigInt> amountPaise;
+  final Value<int> amountPaise;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -4437,7 +4495,7 @@ class SettlementsTableCompanion extends UpdateCompanion<SettlementsTableData> {
     required String roomId,
     required String payerId,
     required String payeeId,
-    required BigInt amountPaise,
+    required int amountPaise,
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -4454,7 +4512,7 @@ class SettlementsTableCompanion extends UpdateCompanion<SettlementsTableData> {
     Expression<String>? roomId,
     Expression<String>? payerId,
     Expression<String>? payeeId,
-    Expression<BigInt>? amountPaise,
+    Expression<int>? amountPaise,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -4478,7 +4536,7 @@ class SettlementsTableCompanion extends UpdateCompanion<SettlementsTableData> {
     Value<String>? roomId,
     Value<String>? payerId,
     Value<String>? payeeId,
-    Value<BigInt>? amountPaise,
+    Value<int>? amountPaise,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -4513,7 +4571,7 @@ class SettlementsTableCompanion extends UpdateCompanion<SettlementsTableData> {
       map['payee_id'] = Variable<String>(payeeId.value);
     }
     if (amountPaise.present) {
-      map['amount_paise'] = Variable<BigInt>(amountPaise.value);
+      map['amount_paise'] = Variable<int>(amountPaise.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -4621,14 +4679,13 @@ class $PotsTableTable extends PotsTable
     'targetAmountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> targetAmountPaise =
-      GeneratedColumn<BigInt>(
-        'target_amount_paise',
-        aliasedName,
-        true,
-        type: DriftSqlType.bigInt,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<int> targetAmountPaise = GeneratedColumn<int>(
+    'target_amount_paise',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _targetDateMeta = const VerificationMeta(
     'targetDate',
   );
@@ -4873,7 +4930,7 @@ class $PotsTableTable extends PotsTable
         data['${effectivePrefix}room_id'],
       ),
       targetAmountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}target_amount_paise'],
       ),
       targetDate: attachedDatabase.typeMapping.read(
@@ -4920,7 +4977,7 @@ class PotsTableData extends DataClass implements Insertable<PotsTableData> {
   final String ownerType;
   final String? userId;
   final String? roomId;
-  final BigInt? targetAmountPaise;
+  final int? targetAmountPaise;
   final DateTime? targetDate;
   final String icon;
   final String gradientStart;
@@ -4960,7 +5017,7 @@ class PotsTableData extends DataClass implements Insertable<PotsTableData> {
       map['room_id'] = Variable<String>(roomId);
     }
     if (!nullToAbsent || targetAmountPaise != null) {
-      map['target_amount_paise'] = Variable<BigInt>(targetAmountPaise);
+      map['target_amount_paise'] = Variable<int>(targetAmountPaise);
     }
     if (!nullToAbsent || targetDate != null) {
       map['target_date'] = Variable<DateTime>(targetDate);
@@ -5019,9 +5076,7 @@ class PotsTableData extends DataClass implements Insertable<PotsTableData> {
       ownerType: serializer.fromJson<String>(json['ownerType']),
       userId: serializer.fromJson<String?>(json['userId']),
       roomId: serializer.fromJson<String?>(json['roomId']),
-      targetAmountPaise: serializer.fromJson<BigInt?>(
-        json['targetAmountPaise'],
-      ),
+      targetAmountPaise: serializer.fromJson<int?>(json['targetAmountPaise']),
       targetDate: serializer.fromJson<DateTime?>(json['targetDate']),
       icon: serializer.fromJson<String>(json['icon']),
       gradientStart: serializer.fromJson<String>(json['gradientStart']),
@@ -5041,7 +5096,7 @@ class PotsTableData extends DataClass implements Insertable<PotsTableData> {
       'ownerType': serializer.toJson<String>(ownerType),
       'userId': serializer.toJson<String?>(userId),
       'roomId': serializer.toJson<String?>(roomId),
-      'targetAmountPaise': serializer.toJson<BigInt?>(targetAmountPaise),
+      'targetAmountPaise': serializer.toJson<int?>(targetAmountPaise),
       'targetDate': serializer.toJson<DateTime?>(targetDate),
       'icon': serializer.toJson<String>(icon),
       'gradientStart': serializer.toJson<String>(gradientStart),
@@ -5059,7 +5114,7 @@ class PotsTableData extends DataClass implements Insertable<PotsTableData> {
     String? ownerType,
     Value<String?> userId = const Value.absent(),
     Value<String?> roomId = const Value.absent(),
-    Value<BigInt?> targetAmountPaise = const Value.absent(),
+    Value<int?> targetAmountPaise = const Value.absent(),
     Value<DateTime?> targetDate = const Value.absent(),
     String? icon,
     String? gradientStart,
@@ -5179,7 +5234,7 @@ class PotsTableCompanion extends UpdateCompanion<PotsTableData> {
   final Value<String> ownerType;
   final Value<String?> userId;
   final Value<String?> roomId;
-  final Value<BigInt?> targetAmountPaise;
+  final Value<int?> targetAmountPaise;
   final Value<DateTime?> targetDate;
   final Value<String> icon;
   final Value<String> gradientStart;
@@ -5233,7 +5288,7 @@ class PotsTableCompanion extends UpdateCompanion<PotsTableData> {
     Expression<String>? ownerType,
     Expression<String>? userId,
     Expression<String>? roomId,
-    Expression<BigInt>? targetAmountPaise,
+    Expression<int>? targetAmountPaise,
     Expression<DateTime>? targetDate,
     Expression<String>? icon,
     Expression<String>? gradientStart,
@@ -5269,7 +5324,7 @@ class PotsTableCompanion extends UpdateCompanion<PotsTableData> {
     Value<String>? ownerType,
     Value<String?>? userId,
     Value<String?>? roomId,
-    Value<BigInt?>? targetAmountPaise,
+    Value<int?>? targetAmountPaise,
     Value<DateTime?>? targetDate,
     Value<String>? icon,
     Value<String>? gradientStart,
@@ -5320,7 +5375,7 @@ class PotsTableCompanion extends UpdateCompanion<PotsTableData> {
       map['room_id'] = Variable<String>(roomId.value);
     }
     if (targetAmountPaise.present) {
-      map['target_amount_paise'] = Variable<BigInt>(targetAmountPaise.value);
+      map['target_amount_paise'] = Variable<int>(targetAmountPaise.value);
     }
     if (targetDate.present) {
       map['target_date'] = Variable<DateTime>(targetDate.value);
@@ -5415,11 +5470,11 @@ class $PotContributionsTableTable extends PotContributionsTable
     'amountPaise',
   );
   @override
-  late final GeneratedColumn<BigInt> amountPaise = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> amountPaise = GeneratedColumn<int>(
     'amount_paise',
     aliasedName,
     false,
-    type: DriftSqlType.bigInt,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -5556,7 +5611,7 @@ class $PotContributionsTableTable extends PotContributionsTable
         data['${effectivePrefix}user_id'],
       )!,
       amountPaise: attachedDatabase.typeMapping.read(
-        DriftSqlType.bigInt,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paise'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
@@ -5585,7 +5640,7 @@ class PotContributionsTableData extends DataClass
   final String id;
   final String potId;
   final String userId;
-  final BigInt amountPaise;
+  final int amountPaise;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -5604,7 +5659,7 @@ class PotContributionsTableData extends DataClass
     map['id'] = Variable<String>(id);
     map['pot_id'] = Variable<String>(potId);
     map['user_id'] = Variable<String>(userId);
-    map['amount_paise'] = Variable<BigInt>(amountPaise);
+    map['amount_paise'] = Variable<int>(amountPaise);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -5636,7 +5691,7 @@ class PotContributionsTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       potId: serializer.fromJson<String>(json['potId']),
       userId: serializer.fromJson<String>(json['userId']),
-      amountPaise: serializer.fromJson<BigInt>(json['amountPaise']),
+      amountPaise: serializer.fromJson<int>(json['amountPaise']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -5649,7 +5704,7 @@ class PotContributionsTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'potId': serializer.toJson<String>(potId),
       'userId': serializer.toJson<String>(userId),
-      'amountPaise': serializer.toJson<BigInt>(amountPaise),
+      'amountPaise': serializer.toJson<int>(amountPaise),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -5660,7 +5715,7 @@ class PotContributionsTableData extends DataClass
     String? id,
     String? potId,
     String? userId,
-    BigInt? amountPaise,
+    int? amountPaise,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -5731,7 +5786,7 @@ class PotContributionsTableCompanion
   final Value<String> id;
   final Value<String> potId;
   final Value<String> userId;
-  final Value<BigInt> amountPaise;
+  final Value<int> amountPaise;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -5750,7 +5805,7 @@ class PotContributionsTableCompanion
     required String id,
     required String potId,
     required String userId,
-    required BigInt amountPaise,
+    required int amountPaise,
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -5765,7 +5820,7 @@ class PotContributionsTableCompanion
     Expression<String>? id,
     Expression<String>? potId,
     Expression<String>? userId,
-    Expression<BigInt>? amountPaise,
+    Expression<int>? amountPaise,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -5787,7 +5842,7 @@ class PotContributionsTableCompanion
     Value<String>? id,
     Value<String>? potId,
     Value<String>? userId,
-    Value<BigInt>? amountPaise,
+    Value<int>? amountPaise,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -5818,7 +5873,7 @@ class PotContributionsTableCompanion
       map['user_id'] = Variable<String>(userId.value);
     }
     if (amountPaise.present) {
-      map['amount_paise'] = Variable<BigInt>(amountPaise.value);
+      map['amount_paise'] = Variable<int>(amountPaise.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -6684,6 +6739,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final ProfileDao profileDao = ProfileDao(this as AppDatabase);
   late final RoomDao roomDao = RoomDao(this as AppDatabase);
   late final ExpenseDao expenseDao = ExpenseDao(this as AppDatabase);
+  late final PotDao potDao = PotDao(this as AppDatabase);
   late final SyncDao syncDao = SyncDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -6715,6 +6771,7 @@ typedef $$ProfilesTableTableCreateCompanionBuilder =
       Value<bool> notificationsRegularEnabled,
       Value<String?> quietHoursStart,
       Value<String?> quietHoursEnd,
+      Value<int?> monthlyBudgetPaise,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -6730,6 +6787,7 @@ typedef $$ProfilesTableTableUpdateCompanionBuilder =
       Value<bool> notificationsRegularEnabled,
       Value<String?> quietHoursStart,
       Value<String?> quietHoursEnd,
+      Value<int?> monthlyBudgetPaise,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -6981,6 +7039,11 @@ class $$ProfilesTableTableFilterComposer
 
   ColumnFilters<String> get quietHoursEnd => $composableBuilder(
     column: $table.quietHoursEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get monthlyBudgetPaise => $composableBuilder(
+    column: $table.monthlyBudgetPaise,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7251,6 +7314,11 @@ class $$ProfilesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get monthlyBudgetPaise => $composableBuilder(
+    column: $table.monthlyBudgetPaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7305,6 +7373,11 @@ class $$ProfilesTableTableAnnotationComposer
 
   GeneratedColumn<String> get quietHoursEnd => $composableBuilder(
     column: $table.quietHoursEnd,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get monthlyBudgetPaise => $composableBuilder(
+    column: $table.monthlyBudgetPaise,
     builder: (column) => column,
   );
 
@@ -7566,6 +7639,7 @@ class $$ProfilesTableTableTableManager
                 Value<bool> notificationsRegularEnabled = const Value.absent(),
                 Value<String?> quietHoursStart = const Value.absent(),
                 Value<String?> quietHoursEnd = const Value.absent(),
+                Value<int?> monthlyBudgetPaise = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -7579,6 +7653,7 @@ class $$ProfilesTableTableTableManager
                 notificationsRegularEnabled: notificationsRegularEnabled,
                 quietHoursStart: quietHoursStart,
                 quietHoursEnd: quietHoursEnd,
+                monthlyBudgetPaise: monthlyBudgetPaise,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -7594,6 +7669,7 @@ class $$ProfilesTableTableTableManager
                 Value<bool> notificationsRegularEnabled = const Value.absent(),
                 Value<String?> quietHoursStart = const Value.absent(),
                 Value<String?> quietHoursEnd = const Value.absent(),
+                Value<int?> monthlyBudgetPaise = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -7607,6 +7683,7 @@ class $$ProfilesTableTableTableManager
                 notificationsRegularEnabled: notificationsRegularEnabled,
                 quietHoursStart: quietHoursStart,
                 quietHoursEnd: quietHoursEnd,
+                monthlyBudgetPaise: monthlyBudgetPaise,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -9701,7 +9778,7 @@ typedef $$ExpensesTableTableCreateCompanionBuilder =
       required String roomId,
       required String paidBy,
       required String description,
-      required BigInt amountPaise,
+      required int amountPaise,
       Value<String> category,
       Value<String?> subCategory,
       Value<String> splitMode,
@@ -9716,7 +9793,7 @@ typedef $$ExpensesTableTableUpdateCompanionBuilder =
       Value<String> roomId,
       Value<String> paidBy,
       Value<String> description,
-      Value<BigInt> amountPaise,
+      Value<int> amountPaise,
       Value<String> category,
       Value<String?> subCategory,
       Value<String> splitMode,
@@ -9820,7 +9897,7 @@ class $$ExpensesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get amountPaise => $composableBuilder(
+  ColumnFilters<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -9946,7 +10023,7 @@ class $$ExpensesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get amountPaise => $composableBuilder(
+  ColumnOrderings<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -10045,7 +10122,7 @@ class $$ExpensesTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<BigInt> get amountPaise => $composableBuilder(
+  GeneratedColumn<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => column,
   );
@@ -10179,7 +10256,7 @@ class $$ExpensesTableTableTableManager
                 Value<String> roomId = const Value.absent(),
                 Value<String> paidBy = const Value.absent(),
                 Value<String> description = const Value.absent(),
-                Value<BigInt> amountPaise = const Value.absent(),
+                Value<int> amountPaise = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
                 Value<String> splitMode = const Value.absent(),
@@ -10207,7 +10284,7 @@ class $$ExpensesTableTableTableManager
                 required String roomId,
                 required String paidBy,
                 required String description,
-                required BigInt amountPaise,
+                required int amountPaise,
                 Value<String> category = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
                 Value<String> splitMode = const Value.absent(),
@@ -10351,7 +10428,7 @@ typedef $$ExpenseSplitsTableTableCreateCompanionBuilder =
       required String id,
       required String expenseId,
       required String userId,
-      required BigInt amountPaise,
+      required int amountPaise,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -10362,7 +10439,7 @@ typedef $$ExpenseSplitsTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> expenseId,
       Value<String> userId,
-      Value<BigInt> amountPaise,
+      Value<int> amountPaise,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -10438,7 +10515,7 @@ class $$ExpenseSplitsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get amountPaise => $composableBuilder(
+  ColumnFilters<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -10519,7 +10596,7 @@ class $$ExpenseSplitsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get amountPaise => $composableBuilder(
+  ColumnOrderings<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -10598,7 +10675,7 @@ class $$ExpenseSplitsTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<BigInt> get amountPaise => $composableBuilder(
+  GeneratedColumn<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => column,
   );
@@ -10695,7 +10772,7 @@ class $$ExpenseSplitsTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> expenseId = const Value.absent(),
                 Value<String> userId = const Value.absent(),
-                Value<BigInt> amountPaise = const Value.absent(),
+                Value<int> amountPaise = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -10715,7 +10792,7 @@ class $$ExpenseSplitsTableTableTableManager
                 required String id,
                 required String expenseId,
                 required String userId,
-                required BigInt amountPaise,
+                required int amountPaise,
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -10819,7 +10896,7 @@ typedef $$PersonalExpensesTableTableCreateCompanionBuilder =
       required String id,
       required String userId,
       required String description,
-      required BigInt amountPaise,
+      required int amountPaise,
       Value<String> category,
       Value<String?> subCategory,
       required DateTime createdAt,
@@ -10832,7 +10909,7 @@ typedef $$PersonalExpensesTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> userId,
       Value<String> description,
-      Value<BigInt> amountPaise,
+      Value<int> amountPaise,
       Value<String> category,
       Value<String?> subCategory,
       Value<DateTime> createdAt,
@@ -10896,7 +10973,7 @@ class $$PersonalExpensesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get amountPaise => $composableBuilder(
+  ColumnFilters<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -10969,7 +11046,7 @@ class $$PersonalExpensesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get amountPaise => $composableBuilder(
+  ColumnOrderings<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -11040,7 +11117,7 @@ class $$PersonalExpensesTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<BigInt> get amountPaise => $composableBuilder(
+  GeneratedColumn<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => column,
   );
@@ -11128,7 +11205,7 @@ class $$PersonalExpensesTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<String> description = const Value.absent(),
-                Value<BigInt> amountPaise = const Value.absent(),
+                Value<int> amountPaise = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -11152,7 +11229,7 @@ class $$PersonalExpensesTableTableTableManager
                 required String id,
                 required String userId,
                 required String description,
-                required BigInt amountPaise,
+                required int amountPaise,
                 Value<String> category = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
                 required DateTime createdAt,
@@ -11246,7 +11323,7 @@ typedef $$SettlementsTableTableCreateCompanionBuilder =
       required String roomId,
       required String payerId,
       required String payeeId,
-      required BigInt amountPaise,
+      required int amountPaise,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -11258,7 +11335,7 @@ typedef $$SettlementsTableTableUpdateCompanionBuilder =
       Value<String> roomId,
       Value<String> payerId,
       Value<String> payeeId,
-      Value<BigInt> amountPaise,
+      Value<int> amountPaise,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -11350,7 +11427,7 @@ class $$SettlementsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get amountPaise => $composableBuilder(
+  ColumnFilters<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -11454,7 +11531,7 @@ class $$SettlementsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get amountPaise => $composableBuilder(
+  ColumnOrderings<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -11556,7 +11633,7 @@ class $$SettlementsTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<BigInt> get amountPaise => $composableBuilder(
+  GeneratedColumn<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => column,
   );
@@ -11674,7 +11751,7 @@ class $$SettlementsTableTableTableManager
                 Value<String> roomId = const Value.absent(),
                 Value<String> payerId = const Value.absent(),
                 Value<String> payeeId = const Value.absent(),
-                Value<BigInt> amountPaise = const Value.absent(),
+                Value<int> amountPaise = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -11696,7 +11773,7 @@ class $$SettlementsTableTableTableManager
                 required String roomId,
                 required String payerId,
                 required String payeeId,
-                required BigInt amountPaise,
+                required int amountPaise,
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -11820,7 +11897,7 @@ typedef $$PotsTableTableCreateCompanionBuilder =
       required String ownerType,
       Value<String?> userId,
       Value<String?> roomId,
-      Value<BigInt?> targetAmountPaise,
+      Value<int?> targetAmountPaise,
       Value<DateTime?> targetDate,
       Value<String> icon,
       Value<String> gradientStart,
@@ -11838,7 +11915,7 @@ typedef $$PotsTableTableUpdateCompanionBuilder =
       Value<String> ownerType,
       Value<String?> userId,
       Value<String?> roomId,
-      Value<BigInt?> targetAmountPaise,
+      Value<int?> targetAmountPaise,
       Value<DateTime?> targetDate,
       Value<String> icon,
       Value<String> gradientStart,
@@ -11947,7 +12024,7 @@ class $$PotsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get targetAmountPaise => $composableBuilder(
+  ColumnFilters<int> get targetAmountPaise => $composableBuilder(
     column: $table.targetAmountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -12089,7 +12166,7 @@ class $$PotsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get targetAmountPaise => $composableBuilder(
+  ColumnOrderings<int> get targetAmountPaise => $composableBuilder(
     column: $table.targetAmountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12199,7 +12276,7 @@ class $$PotsTableTableAnnotationComposer
   GeneratedColumn<String> get ownerType =>
       $composableBuilder(column: $table.ownerType, builder: (column) => column);
 
-  GeneratedColumn<BigInt> get targetAmountPaise => $composableBuilder(
+  GeneratedColumn<int> get targetAmountPaise => $composableBuilder(
     column: $table.targetAmountPaise,
     builder: (column) => column,
   );
@@ -12342,7 +12419,7 @@ class $$PotsTableTableTableManager
                 Value<String> ownerType = const Value.absent(),
                 Value<String?> userId = const Value.absent(),
                 Value<String?> roomId = const Value.absent(),
-                Value<BigInt?> targetAmountPaise = const Value.absent(),
+                Value<int?> targetAmountPaise = const Value.absent(),
                 Value<DateTime?> targetDate = const Value.absent(),
                 Value<String> icon = const Value.absent(),
                 Value<String> gradientStart = const Value.absent(),
@@ -12376,7 +12453,7 @@ class $$PotsTableTableTableManager
                 required String ownerType,
                 Value<String?> userId = const Value.absent(),
                 Value<String?> roomId = const Value.absent(),
-                Value<BigInt?> targetAmountPaise = const Value.absent(),
+                Value<int?> targetAmountPaise = const Value.absent(),
                 Value<DateTime?> targetDate = const Value.absent(),
                 Value<String> icon = const Value.absent(),
                 Value<String> gradientStart = const Value.absent(),
@@ -12520,7 +12597,7 @@ typedef $$PotContributionsTableTableCreateCompanionBuilder =
       required String id,
       required String potId,
       required String userId,
-      required BigInt amountPaise,
+      required int amountPaise,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -12531,7 +12608,7 @@ typedef $$PotContributionsTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> potId,
       Value<String> userId,
-      Value<BigInt> amountPaise,
+      Value<int> amountPaise,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -12607,7 +12684,7 @@ class $$PotContributionsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<BigInt> get amountPaise => $composableBuilder(
+  ColumnFilters<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnFilters(column),
   );
@@ -12688,7 +12765,7 @@ class $$PotContributionsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<BigInt> get amountPaise => $composableBuilder(
+  ColumnOrderings<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12767,7 +12844,7 @@ class $$PotContributionsTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<BigInt> get amountPaise => $composableBuilder(
+  GeneratedColumn<int> get amountPaise => $composableBuilder(
     column: $table.amountPaise,
     builder: (column) => column,
   );
@@ -12870,7 +12947,7 @@ class $$PotContributionsTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> potId = const Value.absent(),
                 Value<String> userId = const Value.absent(),
-                Value<BigInt> amountPaise = const Value.absent(),
+                Value<int> amountPaise = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -12890,7 +12967,7 @@ class $$PotContributionsTableTableTableManager
                 required String id,
                 required String potId,
                 required String userId,
-                required BigInt amountPaise,
+                required int amountPaise,
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),

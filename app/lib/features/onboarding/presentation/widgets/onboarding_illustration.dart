@@ -1,10 +1,17 @@
-/// Onboarding illustrations — simple, clean Flutter CustomPaint illustrations.
-/// No image assets needed; drawn entirely with Flutter primitives.
+/// Onboarding illustrations — three small, looping, calm animations built
+/// from shapes (no image assets), matching the redesign canvas:
+///   split  — a bill card pops in while "who paid" chips float around it
+///   settle — a swipe-to-settle pill that slides, fills, and checks itself
+///   save   — a sage ring fills while a seedling sprouts two leaves
+/// All of them sit on the active Day/Night palette and honour reduce-motion.
 library;
 
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/motion.dart';
 
 enum IllustrationType { split, settle, save }
 
@@ -15,224 +22,523 @@ class OnboardingIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 220,
-      height: 220,
-      child: CustomPaint(
-        painter: switch (type) {
-          IllustrationType.split  => _SplitPainter(),
-          IllustrationType.settle => _SettlePainter(),
-          IllustrationType.save   => _SavePainter(),
-        },
-      ),
+      width: 300,
+      height: 300,
+      child: switch (type) {
+        IllustrationType.split => const _SplitArt(),
+        IllustrationType.settle => const _SettleArt(),
+        IllustrationType.save => const _SaveArt(),
+      },
     );
   }
 }
 
-// ── Split illustration ────────────────────────────────────────────────────────
-// Three overlapping circles (avatars) with a receipt card between them
-class _SplitPainter extends CustomPainter {
+/// Pops in with a springy overshoot after [delay].
+class _Pop extends StatefulWidget {
+  const _Pop({required this.child, this.delay = Duration.zero});
+  final Widget child;
+  final Duration delay;
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
+  State<_Pop> createState() => _PopState();
+}
 
-    // Background glow
-    final glowPaint = Paint()
-      ..color = AppColors.marigold.withOpacity(0.06)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
-    canvas.drawCircle(Offset(cx, cy), 100, glowPaint);
+class _PopState extends State<_Pop> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 650),
+  );
 
-    // Receipt card
-    final cardPaint = Paint()..color = const Color(0xFF0A0A0B);
-    final cardBorderPaint = Paint()
-      ..color = AppColors.cardBorder
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final cardRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy), width: 130, height: 160),
-      const Radius.circular(20),
-    );
-    canvas.drawRRect(cardRect, cardPaint);
-    canvas.drawRRect(cardRect, cardBorderPaint);
-
-    // Lines on the receipt
-    final linePaint = Paint()
-      ..color = AppColors.cardBorder
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
-    for (int i = 0; i < 4; i++) {
-      final y = cy - 40 + i * 22.0;
-      canvas.drawLine(Offset(cx - 45, y), Offset(cx + 20, y), linePaint);
-      // Amount dots on right
-      final dotPaint = Paint()..color = AppColors.marigold.withOpacity(0.5 + i * 0.12);
-      canvas.drawLine(Offset(cx + 28, y), Offset(cx + 48, y), dotPaint..strokeWidth = 2);
-    }
-
-    // Three avatar circles
-    const avatarColors = [AppColors.marigold, Color(0xFF7A86FF), AppColors.jade];
-    const positions = [
-      Offset(-55, -65),
-      Offset(55, -65),
-      Offset(0, 85),
-    ];
-    final avatarPaint = Paint();
-    for (int i = 0; i < 3; i++) {
-      avatarPaint.color = avatarColors[i].withOpacity(0.9);
-      canvas.drawCircle(Offset(cx + positions[i].dx, cy + positions[i].dy), 22, avatarPaint);
-      avatarPaint
-        ..color = Colors.black.withOpacity(0.4)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2;
-      canvas.drawCircle(Offset(cx + positions[i].dx, cy + positions[i].dy), 22, avatarPaint);
-      avatarPaint
-        ..style = PaintingStyle.fill
-        ..color = avatarColors[i];
-    }
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (mounted) _c.forward();
+    });
   }
 
   @override
-  bool shouldRepaint(_) => false;
-}
-
-// ── Settle illustration ───────────────────────────────────────────────────────
-// UPI arrow swoosh from one avatar to another
-class _SettlePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-
-    final glowPaint = Paint()
-      ..color = AppColors.jade.withOpacity(0.08)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
-    canvas.drawCircle(Offset(cx, cy), 90, glowPaint);
-
-    // From avatar
-    final fromPaint = Paint()..color = AppColors.rust.withOpacity(0.8);
-    canvas.drawCircle(Offset(cx - 70, cy), 26, fromPaint);
-
-    // To avatar
-    final toPaint = Paint()..color = AppColors.marigold.withOpacity(0.9);
-    canvas.drawCircle(Offset(cx + 70, cy), 26, toPaint);
-
-    // Curved arrow
-    final arrowPath = Path()
-      ..moveTo(cx - 44, cy)
-      ..cubicTo(cx - 10, cy - 40, cx + 10, cy - 40, cx + 44, cy);
-
-    final arrowPaint = Paint()
-      ..color = AppColors.marigold
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round;
-    canvas.drawPath(arrowPath, arrowPaint);
-
-    // Arrowhead
-    final headPaint = Paint()..color = AppColors.marigold;
-    final headPath = Path()
-      ..moveTo(cx + 50, cy)
-      ..lineTo(cx + 40, cy - 7)
-      ..lineTo(cx + 40, cy + 7)
-      ..close();
-    canvas.drawPath(headPath, headPaint);
-
-    // Amount chip
-    final chipPaint = Paint()..color = AppColors.marigold.withOpacity(0.15);
-    final chipBorderPaint = Paint()
-      ..color = AppColors.marigold.withOpacity(0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final chipRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy + 50), width: 80, height: 30),
-      const Radius.circular(15),
-    );
-    canvas.drawRRect(chipRect, chipPaint);
-    canvas.drawRRect(chipRect, chipBorderPaint);
-
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        text: '₹230',
-        style: TextStyle(color: AppColors.marigold, fontSize: 14, fontWeight: FontWeight.w700),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(canvas, Offset(cx - textPainter.width / 2, cy + 50 - textPainter.height / 2));
+  void dispose() {
+    _c.dispose();
+    super.dispose();
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  Widget build(BuildContext context) {
+    if (Motion.reduced(context)) return widget.child;
+    return ScaleTransition(
+      scale: CurvedAnimation(parent: _c, curve: Curves.easeOutBack),
+      child: FadeTransition(opacity: _c, child: widget.child),
+    );
+  }
 }
 
-// ── Save illustration ─────────────────────────────────────────────────────────
-// Abstract ascending-arc progress ring (not a piggy bank — per spec)
-class _SavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-
-    // Background ring
-    final bgPaint = Paint()
-      ..color = AppColors.jade.withOpacity(0.12)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCenter(center: Offset(cx, cy), width: 140, height: 140),
-      math.pi * 0.75,
-      math.pi * 1.5,
-      false,
-      bgPaint,
-    );
-
-    // Progress arc (62%)
-    final progressPaint = Paint()
-      ..color = AppColors.jade
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCenter(center: Offset(cx, cy), width: 140, height: 140),
-      math.pi * 0.75,
-      math.pi * 1.5 * 0.62,
-      false,
-      progressPaint,
-    );
-
-    // Traveling spark at arc tip
-    final sparkAngle = math.pi * 0.75 + math.pi * 1.5 * 0.62;
-    final sparkX = cx + 70 * math.cos(sparkAngle);
-    final sparkY = cy + 70 * math.sin(sparkAngle);
-    final sparkPaint = Paint()
-      ..color = AppColors.jade
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-    canvas.drawCircle(Offset(sparkX, sparkY), 6, sparkPaint);
-
-    // Center text (62%)
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        children: [
-          TextSpan(
-            text: '62%',
-            style: TextStyle(color: AppColors.jade, fontSize: 28, fontWeight: FontWeight.w800),
+Widget _chip(
+  String text, {
+  required Color bg,
+  required Color fg,
+  Widget? lead,
+}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: AppColors.cardShadow,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (lead != null) ...[lead, const SizedBox(width: 8)],
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: fg,
           ),
-        ],
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(canvas, Offset(cx - textPainter.width / 2, cy - textPainter.height / 2));
+        ),
+      ],
+    ),
+  );
+}
 
-    // Label below
-    final labelPainter = TextPainter(
-      text: const TextSpan(
-        text: 'there',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    labelPainter.paint(canvas, Offset(cx - labelPainter.width / 2, cy + 16));
+Widget _dot(Color c, [double s = 26]) => Container(
+  width: s,
+  height: s,
+  decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+);
+
+// ── 1. Split ─────────────────────────────────────────────────────────────
+
+class _SplitArt extends StatelessWidget {
+  const _SplitArt();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: 60,
+          top: 46,
+          child: _Pop(
+            child: Container(
+              width: 180,
+              height: 208,
+              padding: const EdgeInsets.all(20),
+              decoration: AppColors.cardDecoration(radius: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PIZZA NIGHT',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: .6,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '₹1,350',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Divider(color: AppColors.fog, height: 1),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Each',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        '₹450',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      _dot(const Color(0xFFF4C99A)),
+                      const SizedBox(width: 6),
+                      _dot(const Color(0xFFA9D3C6)),
+                      const SizedBox(width: 6),
+                      _dot(const Color(0xFFC9C0EE)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          top: 18,
+          child: Floating(
+            amplitude: 10,
+            child: _Pop(
+              delay: const Duration(milliseconds: 350),
+              child: _chip(
+                'Aditi paid',
+                bg: AppColors.card,
+                fg: AppColors.textPrimary,
+                lead: _dot(const Color(0xFFF4C99A), 20),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          top: 140,
+          child: Floating(
+            amplitude: 8,
+            phase: .4,
+            rotate: .06,
+            period: const Duration(seconds: 5),
+            child: _Pop(
+              delay: const Duration(milliseconds: 550),
+              child: _chip(
+                '+₹900 back',
+                bg: AppColors.jadeTint,
+                fg: AppColors.jadeInk,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 18,
+          bottom: 4,
+          child: Floating(
+            amplitude: 9,
+            phase: .7,
+            child: _Pop(
+              delay: const Duration(milliseconds: 750),
+              child: _chip(
+                'split 3 ways',
+                bg: AppColors.lilacTint,
+                fg: AppColors.lilacInk,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── 2. Settle ────────────────────────────────────────────────────────────
+
+class _SettleArt extends StatefulWidget {
+  const _SettleArt();
+
+  @override
+  State<_SettleArt> createState() => _SettleArtState();
+}
+
+class _SettleArtState extends State<_SettleArt>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3200),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  /// 0 → 1 → hold → 0 over one loop, eased like a thumb drag.
+  double _slide(double t) {
+    if (t < .12) return 0;
+    if (t < .55) return Curves.easeInOutCubic.transform((t - .12) / .43);
+    if (t < .8) return 1;
+    return 1 - Curves.easeInOutCubic.transform((t - .8) / .2);
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  Widget build(BuildContext context) {
+    const trackW = 268.0;
+    const knob = 56.0;
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned(
+          top: 40,
+          child: _Pop(
+            child: Container(
+              width: 270,
+              padding: const EdgeInsets.all(22),
+              decoration: AppColors.cardDecoration(radius: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'You pay Aditi',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '₹230',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.2,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    'via any UPI app',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 40,
+          child: AnimatedBuilder(
+            animation: _c,
+            builder: (ctx, _) {
+              final p = Motion.reduced(ctx) ? 0.0 : _slide(_c.value);
+              final checked =
+                  !Motion.reduced(ctx) && _c.value > .5 && _c.value < .82;
+              return SizedBox(
+                width: trackW,
+                height: 64,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.fog,
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                    ),
+                    Positioned(
+                      left: 4,
+                      top: 4,
+                      bottom: 4,
+                      child: Container(
+                        width: knob + p * (trackW - knob - 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.marigoldTint,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        'Swipe to settle',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 4 + p * (trackW - knob - 8),
+                      top: 4,
+                      child: Container(
+                        width: knob,
+                        height: knob,
+                        decoration: BoxDecoration(
+                          color: AppColors.btn,
+                          shape: BoxShape.circle,
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            checked
+                                ? Icons.check_rounded
+                                : Icons.arrow_forward_rounded,
+                            key: ValueKey(checked),
+                            color: AppColors.onBtn,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── 3. Save ──────────────────────────────────────────────────────────────
+
+class _SaveArt extends StatefulWidget {
+  const _SaveArt();
+
+  @override
+  State<_SaveArt> createState() => _SaveArtState();
+}
+
+class _SaveArtState extends State<_SaveArt>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..forward();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Breathing(
+          child: Container(
+            width: 230,
+            height: 230,
+            decoration: BoxDecoration(
+              color: AppColors.jadeTint,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+        AnimatedBuilder(
+          animation: _c,
+          builder: (ctx, _) {
+            final t = Motion.reduced(ctx) ? 1.0 : _c.value;
+            return CustomPaint(
+              size: const Size(190, 190),
+              painter: _SproutPainter(
+                ring:
+                    Curves.easeOutCubic.transform((t / .75).clamp(0, 1)) * .68,
+                stem: Curves.easeOutBack.transform(
+                  ((t - .12) / .5).clamp(0, 1),
+                ),
+                leafA: Curves.easeOutBack.transform(
+                  ((t - .45) / .3).clamp(0, 1),
+                ),
+                leafB: Curves.easeOutBack.transform(
+                  ((t - .55) / .3).clamp(0, 1),
+                ),
+                track: AppColors.fog,
+                sage: AppColors.jade,
+              ),
+            );
+          },
+        ),
+        Positioned(
+          bottom: 6,
+          child: _Pop(
+            delay: const Duration(milliseconds: 1500),
+            child: _chip(
+              '₹340 saved this week',
+              bg: AppColors.card,
+              fg: AppColors.jadeInk,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SproutPainter extends CustomPainter {
+  _SproutPainter({
+    required this.ring,
+    required this.stem,
+    required this.leafA,
+    required this.leafB,
+    required this.track,
+    required this.sage,
+  });
+  final double ring;
+  final double stem;
+  final double leafA;
+  final double leafB;
+  final Color track;
+  final Color sage;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.width / 2 - 8;
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(c, r, stroke..color = track);
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      -math.pi / 2,
+      2 * math.pi * ring,
+      false,
+      stroke..color = sage,
+    );
+
+    // Stem grows from the bottom.
+    final base = c + const Offset(0, 46);
+    final top = base - Offset(0, 54 * stem);
+    canvas.drawLine(
+      base,
+      top,
+      Paint()
+        ..color = sage
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round,
+    );
+
+    void leaf(double grow, double dir, Color color, double y) {
+      if (grow <= 0) return;
+      final anchor = base - Offset(0, y);
+      canvas.save();
+      canvas.translate(anchor.dx, anchor.dy);
+      canvas.scale(grow);
+      final path = Path()
+        ..moveTo(0, 0)
+        ..cubicTo(0, -18, dir * 14, -28, dir * 32, -28)
+        ..cubicTo(dir * 32, -10, dir * 18, 0, 0, 0)
+        ..close();
+      canvas.drawPath(path, Paint()..color = color);
+      canvas.restore();
+    }
+
+    leaf(leafA, 1, const Color(0xFF7FBFAE), 40);
+    leaf(leafB, -1, const Color(0xFFA9D3C6), 28);
+  }
+
+  @override
+  bool shouldRepaint(_SproutPainter old) =>
+      old.ring != ring ||
+      old.stem != stem ||
+      old.leafA != leafA ||
+      old.leafB != leafB;
 }

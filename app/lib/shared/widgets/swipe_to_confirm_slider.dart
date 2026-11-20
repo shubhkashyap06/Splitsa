@@ -21,12 +21,12 @@ class SwipeToConfirmSlider extends StatefulWidget {
     super.key,
     required this.onConfirm,
     this.label = 'Swipe right to confirm',
-    this.accentColor = AppColors.marigold,
+    this.accentColor,
   });
 
   final VoidCallback onConfirm;
   final String label;
-  final Color accentColor;
+  final Color? accentColor;
 
   @override
   State<SwipeToConfirmSlider> createState() => _SwipeToConfirmSliderState();
@@ -77,8 +77,10 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
     final progress = _dragX / _maxDrag;
     if (progress >= _threshold) {
       // Snap forward, then confirm
-      _snapAnim = Tween<double>(begin: _dragX, end: _maxDrag)
-          .animate(CurvedAnimation(parent: _snapCtrl, curve: AppCurves.springy));
+      _snapAnim = Tween<double>(
+        begin: _dragX,
+        end: _maxDrag,
+      ).animate(CurvedAnimation(parent: _snapCtrl, curve: AppCurves.springy));
       _snapCtrl.reset();
       _snapCtrl.forward();
       setState(() => _confirmed = true);
@@ -86,8 +88,10 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
       Future.delayed(AppDurations.fast, widget.onConfirm);
     } else {
       // Spring back to start
-      _snapAnim = Tween<double>(begin: _dragX, end: 0)
-          .animate(CurvedAnimation(parent: _snapCtrl, curve: AppCurves.bounce));
+      _snapAnim = Tween<double>(
+        begin: _dragX,
+        end: 0,
+      ).animate(CurvedAnimation(parent: _snapCtrl, curve: AppCurves.bounce));
       _snapCtrl.reset();
       _snapCtrl.forward();
     }
@@ -98,8 +102,13 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
     return LayoutBuilder(
       builder: (context, constraints) {
         _maxDrag = constraints.maxWidth - _knobSize - 8;
-        final fillWidth = (_dragX + _knobSize + 4).clamp(0, constraints.maxWidth).toDouble();
-        final labelOpacity = (1.0 - (_dragX / (_maxDrag * 0.6))).clamp(0.0, 1.0);
+        final fillWidth = (_dragX + _knobSize + 4)
+            .clamp(0, constraints.maxWidth)
+            .toDouble();
+        final labelOpacity = (1.0 - (_dragX / (_maxDrag * 0.6))).clamp(
+          0.0,
+          1.0,
+        );
 
         return Container(
           height: _trackHeight,
@@ -107,6 +116,7 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
             color: const Color(0x11FFFFFF), // 7% white
             borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
             border: Border.all(color: AppColors.cardBorder),
+            boxShadow: AppColors.cardShadow,
           ),
           clipBehavior: Clip.hardEdge,
           child: Stack(
@@ -119,8 +129,10 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      widget.accentColor.withOpacity(0.7),
-                      widget.accentColor,
+                      (widget.accentColor ?? AppColors.jade).withValues(
+                        alpha: 0.7,
+                      ),
+                      (widget.accentColor ?? AppColors.jade),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
@@ -147,25 +159,29 @@ class _SwipeToConfirmSliderState extends State<SwipeToConfirmSlider>
                 left: 4 + _dragX,
                 top: (_trackHeight - _knobSize) / 2,
                 child: GestureDetector(
-                  onPanStart:  _onPanStart,
+                  onPanStart: _onPanStart,
                   onPanUpdate: _onPanUpdate,
-                  onPanEnd:    _onPanEnd,
+                  onPanEnd: _onPanEnd,
                   child: Container(
                     width: _knobSize,
                     height: _knobSize,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusPill,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 8,
                           offset: const Offset(2, 0),
                         ),
                       ],
                     ),
                     child: Icon(
-                      _confirmed ? Icons.check_rounded : Icons.arrow_forward_rounded,
+                      _confirmed
+                          ? Icons.check_rounded
+                          : Icons.arrow_forward_rounded,
                       color: AppColors.black,
                       size: 24,
                     ),

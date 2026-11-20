@@ -49,8 +49,12 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
   @override
   void dispose() {
     _emailController.dispose();
-    for (final c in _otpControllers) { c.dispose(); }
-    for (final f in _otpFocusNodes) { f.dispose(); }
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final f in _otpFocusNodes) {
+      f.dispose();
+    }
     _resendTimer?.cancel();
     super.dispose();
   }
@@ -70,12 +74,15 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
     final state = ref.read(authNotifierProvider);
     if (state is AsyncError) {
       if (mounted) {
-        // [FAKE CODE BYPASS] - Show a snackbar but proceed anyway so you can test the UI
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Supabase error bypassed for UI testing. Use OTP 123456')),
+          const SnackBar(
+            content: Text(
+              "Couldn't send the code — check your connection and try again",
+            ),
+          ),
         );
       }
-      // return; // Commented out to allow proceeding to OTP input
+      return;
     }
 
     setState(() {
@@ -106,26 +113,26 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
     final otp = _otpControllers.map((c) => c.text).join();
     if (otp.length < 6) return;
 
-    // [FAKE CODE BYPASS]
-    if (otp == '123456') {
-      if (mounted) context.go('/home');
-      return;
-    }
-
-    final ok = await ref.read(authNotifierProvider.notifier).verifyEmailOtp(_email, otp);
+    final ok = await ref
+        .read(authNotifierProvider.notifier)
+        .verifyEmailOtp(_email, otp);
     if (ok && mounted) {
       context.go('/home');
     } else if (mounted) {
       // Shake OTP boxes on wrong code
       _clearOtp();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Wrong code — check your email and try again')),
+        const SnackBar(
+          content: Text('Wrong code — check your email and try again'),
+        ),
       );
     }
   }
 
   void _clearOtp() {
-    for (final c in _otpControllers) { c.clear(); }
+    for (final c in _otpControllers) {
+      c.clear();
+    }
     _otpFocusNodes[0].requestFocus();
   }
 
@@ -158,16 +165,25 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
               // Back button
               GestureDetector(
                 onTap: _otpSent
-                    ? () => setState(() { _otpSent = false; _resendTimer?.cancel(); })
+                    ? () => setState(() {
+                        _otpSent = false;
+                        _resendTimer?.cancel();
+                      })
                     : () => context.pop(),
                 child: Container(
-                  width: 40, height: 40,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                     border: Border.all(color: AppColors.cardBorder),
+                    boxShadow: AppColors.cardShadow,
                   ),
-                  child: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 16),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    color: AppColors.textPrimary,
+                    size: 16,
+                  ),
                 ),
               ),
 
@@ -236,7 +252,9 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
               const TextSpan(text: 'We sent a 6-digit code to '),
               TextSpan(
                 text: _email,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
@@ -246,11 +264,14 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
         // 6 OTP boxes
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(6, (i) => _OtpBox(
-            controller: _otpControllers[i],
-            focusNode: _otpFocusNodes[i],
-            onChanged: (v) => _onOtpChanged(i, v),
-          )),
+          children: List.generate(
+            6,
+            (i) => _OtpBox(
+              controller: _otpControllers[i],
+              focusNode: _otpFocusNodes[i],
+              onChanged: (v) => _onOtpChanged(i, v),
+            ),
+          ),
         ),
 
         const SizedBox(height: AppSpacing.xl),
@@ -260,7 +281,12 @@ class _EmailOtpScreenState extends ConsumerState<EmailOtpScreen> {
           child: _canResend
               ? TextButton(
                   onPressed: _sendOtp,
-                  child: Text('Resend code', style: AppTextStyles.bodySemibold.copyWith(color: AppColors.marigold)),
+                  child: Text(
+                    'Resend code',
+                    style: AppTextStyles.bodySemibold.copyWith(
+                      color: AppColors.marigold,
+                    ),
+                  ),
                 )
               : Text(
                   'Resend OTP in 0:${_secondsLeft.toString().padLeft(2, '0')}',
@@ -312,15 +338,15 @@ class _OtpBox extends StatelessWidget {
           fillColor: AppColors.card,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.cardBorder),
+            borderSide: BorderSide(color: AppColors.cardBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.marigold, width: 1.5),
+            borderSide: BorderSide(color: AppColors.marigold, width: 1.5),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.cardBorder),
+            borderSide: BorderSide(color: AppColors.cardBorder),
           ),
           contentPadding: EdgeInsets.zero,
         ),
@@ -331,7 +357,11 @@ class _OtpBox extends StatelessWidget {
 }
 
 class _FullWidthButton extends StatefulWidget {
-  const _FullWidthButton({required this.label, required this.onTap, this.isLoading = false});
+  const _FullWidthButton({
+    required this.label,
+    required this.onTap,
+    this.isLoading = false,
+  });
   final String label;
   final VoidCallback? onTap;
   final bool isLoading;
@@ -340,20 +370,30 @@ class _FullWidthButton extends StatefulWidget {
   State<_FullWidthButton> createState() => _FullWidthButtonState();
 }
 
-class _FullWidthButtonState extends State<_FullWidthButton> with SingleTickerProviderStateMixin {
+class _FullWidthButtonState extends State<_FullWidthButton>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _scaleCtrl = AnimationController(
-    vsync: this, duration: AppDurations.veryFast,
-    lowerBound: 0.96, upperBound: 1.0, value: 1.0,
+    vsync: this,
+    duration: AppDurations.veryFast,
+    lowerBound: 0.96,
+    upperBound: 1.0,
+    value: 1.0,
   );
 
   @override
-  void dispose() { _scaleCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _scaleCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => _scaleCtrl.reverse(),
-      onTapUp: (_) { _scaleCtrl.forward(); widget.onTap?.call(); },
+      onTapUp: (_) {
+        _scaleCtrl.forward();
+        widget.onTap?.call();
+      },
       onTapCancel: () => _scaleCtrl.forward(),
       child: ScaleTransition(
         scale: _scaleCtrl,
@@ -362,19 +402,24 @@ class _FullWidthButtonState extends State<_FullWidthButton> with SingleTickerPro
           height: 56,
           decoration: BoxDecoration(
             color: widget.onTap == null
-                ? AppColors.marigold.withOpacity(0.4)
+                ? AppColors.marigold.withValues(alpha: 0.4)
                 : AppColors.marigold,
             borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
           ),
           alignment: Alignment.center,
           child: widget.isLoading
-              ? const SizedBox(
-                  width: 22, height: 22,
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
                   child: CircularProgressIndicator(
-                    color: AppColors.black, strokeWidth: 2.5,
+                    color: AppColors.onBtn,
+                    strokeWidth: 2.5,
                   ),
                 )
-              : Text(widget.label, style: AppTextStyles.button.copyWith(color: AppColors.black)),
+              : Text(
+                  widget.label,
+                  style: AppTextStyles.button.copyWith(color: AppColors.onBtn),
+                ),
         ),
       ),
     );

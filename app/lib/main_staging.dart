@@ -10,9 +10,5 @@ Future<void> main() async {
   AppConfig.init();
   await SupabaseService.init();
 
-  runApp(
-    const ProviderScope(
-      child: SplitsaApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: SplitsaApp()));
 }

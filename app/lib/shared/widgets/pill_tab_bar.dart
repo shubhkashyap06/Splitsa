@@ -1,13 +1,15 @@
-/// PillTabBar — the floating black pill tab bar from UI_UX_SPEC.md §2.
+/// PillTabBar — the floating frosted-glass tab bar (UI_UX_SPEC.md §2).
 ///
 /// Behaviour:
-///   • 5 icon-only tabs: Home / Rooms / Add (raised, marigold) / Pots / Insights
-///   • Active tab's icon sits inside a white circular bubble that
+///   • 5 icon-only tabs: Home / Rooms / Add (raised, sage) / Pots / Insights
+///   • Active tab's icon sits inside an ink (Day) / cream (Night) bubble that
 ///     springs/slides between icons on tab change — never a hard cut
-///   • The Add (index 2) button is always a raised marigold circle, does NOT
+///   • The Add (index 2) button is always a raised sage circle, does NOT
 ///     participate in the active-bubble system — it calls [onAddPressed] instead
 ///   • Tapped icon does a small bounce-scale (spring press)
 library;
+
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -15,13 +17,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_durations.dart';
 import '../../../core/theme/app_spacing.dart';
 
-enum _Tab { home, rooms, add, pots, insights }
-
 const _tabIcons = [
   Icons.home_outlined,
   Icons.group_outlined,
-  Icons.add,             // Add — handled separately
-  Icons.savings_outlined,
+  Icons.add, // Add — handled separately
+  Icons.spa_outlined,
   Icons.insights_outlined,
 ];
 
@@ -29,7 +29,7 @@ const _tabActiveIcons = [
   Icons.home_rounded,
   Icons.group_rounded,
   Icons.add,
-  Icons.savings_rounded,
+  Icons.spa_rounded,
   Icons.bar_chart_rounded,
 ];
 
@@ -66,18 +66,28 @@ class _PillTabBarState extends State<PillTabBar> with TickerProviderStateMixin {
     super.initState();
     _prevIndex = widget.currentIndex == 2 ? 0 : widget.currentIndex;
 
-    _bubbleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 340));
-    _bubblePosition = Tween<double>(begin: _indexToFraction(_prevIndex), end: _indexToFraction(_prevIndex))
-        .animate(CurvedAnimation(parent: _bubbleController, curve: AppCurves.bounce));
+    _bubbleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 340),
+    );
+    _bubblePosition =
+        Tween<double>(
+          begin: _indexToFraction(_prevIndex),
+          end: _indexToFraction(_prevIndex),
+        ).animate(
+          CurvedAnimation(parent: _bubbleController, curve: AppCurves.bounce),
+        );
 
     for (int i = 0; i < 5; i++) {
-      _bounceControllers.add(AnimationController(
-        vsync: this,
-        duration: AppDurations.veryFast,
-        lowerBound: 0.88,
-        upperBound: 1.0,
-        value: 1.0,
-      ));
+      _bounceControllers.add(
+        AnimationController(
+          vsync: this,
+          duration: AppDurations.veryFast,
+          lowerBound: 0.88,
+          upperBound: 1.0,
+          value: 1.0,
+        ),
+      );
     }
   }
 
@@ -92,15 +102,19 @@ class _PillTabBarState extends State<PillTabBar> with TickerProviderStateMixin {
   @override
   void dispose() {
     _bubbleController.dispose();
-    for (final c in _bounceControllers) { c.dispose(); }
+    for (final c in _bounceControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   void _animateBubbleTo(int index) {
     final fromFraction = _indexToFraction(_prevIndex);
-    final toFraction   = _indexToFraction(index);
+    final toFraction = _indexToFraction(index);
     _bubblePosition = Tween<double>(begin: fromFraction, end: toFraction)
-        .animate(CurvedAnimation(parent: _bubbleController, curve: AppCurves.bounce));
+        .animate(
+          CurvedAnimation(parent: _bubbleController, curve: AppCurves.bounce),
+        );
     _bubbleController
       ..reset()
       ..forward();
@@ -141,68 +155,78 @@ class _PillTabBarState extends State<PillTabBar> with TickerProviderStateMixin {
         bottom: AppSpacing.xl,
       ),
       child: Container(
-        height: 68,
+        height: 72,
         decoration: BoxDecoration(
-          color: AppColors.tabBarBg,
           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          border: Border.all(color: AppColors.tabBarBorder),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          boxShadow: AppColors.cardShadow,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          child: LayoutBuilder(builder: (context, constraints) {
-            final barWidth = constraints.maxWidth;
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                // ── Sliding white bubble ─────────────────────────────────
-                AnimatedBuilder(
-                  animation: _bubblePosition,
-                  builder: (context, _) {
-                    if (widget.currentIndex == 2) {
-                      // No bubble while Add is "active"
-                      return const SizedBox.shrink();
-                    }
-                    final bubbleX = _bubblePosition.value * barWidth - barWidth / 2;
-                    return Transform.translate(
-                      offset: Offset(bubbleX, 0),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                        ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.tabBarBg,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                border: Border.all(color: AppColors.tabBarBorder),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final barWidth = constraints.maxWidth;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // ── Sliding white bubble ─────────────────────────────────
+                      AnimatedBuilder(
+                        animation: _bubblePosition,
+                        builder: (context, _) {
+                          if (widget.currentIndex == 2) {
+                            // No bubble while Add is "active"
+                            return const SizedBox.shrink();
+                          }
+                          final bubbleX =
+                              _bubblePosition.value * barWidth - barWidth / 2;
+                          return Transform.translate(
+                            offset: Offset(bubbleX, 0),
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: AppColors.btn,
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusPill,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
 
-                // ── Tab icons ────────────────────────────────────────────
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(5, (index) {
-                    final isAdd    = index == 2;
-                    final isActive = !isAdd && index == widget.currentIndex;
-                    return _TabButton(
-                      index:        index,
-                      isAdd:        isAdd,
-                      isActive:     isActive,
-                      icon:         isActive ? _tabActiveIcons[index] : _tabIcons[index],
-                      bounceCtrl:   _bounceControllers[index],
-                      onTap:        () => _onTabTap(index),
-                    );
-                  }),
-                ),
-              ],
-            );
-          }),
+                      // ── Tab icons ────────────────────────────────────────────
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(5, (index) {
+                          final isAdd = index == 2;
+                          final isActive =
+                              !isAdd && index == widget.currentIndex;
+                          return _TabButton(
+                            index: index,
+                            isAdd: isAdd,
+                            isActive: isActive,
+                            icon: isActive
+                                ? _tabActiveIcons[index]
+                                : _tabIcons[index],
+                            bounceCtrl: _bounceControllers[index],
+                            onTap: () => _onTabTap(index),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -241,7 +265,7 @@ class _TabButton extends StatelessWidget {
                 : Icon(
                     icon,
                     size: 22,
-                    color: isActive ? AppColors.black : AppColors.textSecondary,
+                    color: isActive ? AppColors.onBtn : AppColors.textSecondary,
                   ),
           ),
         ),
@@ -257,20 +281,20 @@ class _AddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 48,
-      height: 48,
+      width: 54,
+      height: 54,
       decoration: BoxDecoration(
-        color: AppColors.marigold,
+        color: AppColors.jade,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         boxShadow: [
           BoxShadow(
-            color: AppColors.marigold.withOpacity(0.45),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.jade.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Icon(icon, size: 24, color: AppColors.black),
+      child: Icon(icon, size: 26, color: AppColors.onBtn),
     );
   }
 }

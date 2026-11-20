@@ -4,7 +4,7 @@
 /// absorbs any rounding remainder so the sum always equals [totalPaise]
 /// exactly. This is a pure function — no state, no side effects.
 ///
-/// Returns a List<int> of length [n] where each entry is the share
+/// Returns a `List<int>` of length [n] where each entry is the share
 /// in paise for that index.
 library;
 
@@ -17,7 +17,10 @@ List<int> splitAmount(int totalPaise, int n, int payerIndex) {
   final perPerson = totalPaise ~/ n; // floor division
   final remainder = totalPaise - (perPerson * n);
 
-  return List.generate(n, (i) => i == payerIndex ? perPerson + remainder : perPerson);
+  return List.generate(
+    n,
+    (i) => i == payerIndex ? perPerson + remainder : perPerson,
+  );
 }
 
 /// Split [totalPaise] by explicit percentages.
@@ -31,7 +34,9 @@ List<int> splitByPercentage(
   assert(percentages.isNotEmpty);
   assert(payerIndex >= 0 && payerIndex < percentages.length);
 
-  final shares = percentages.map((pct) => (totalPaise * pct / 100).floor()).toList();
+  final shares = percentages
+      .map((pct) => (totalPaise * pct / 100).floor())
+      .toList();
   final allocated = shares.fold<int>(0, (s, v) => s + v);
   final remainder = totalPaise - allocated;
 
@@ -41,11 +46,7 @@ List<int> splitByPercentage(
 
 /// Split [totalPaise] by explicit amounts in paise.
 /// The [payerIndex]'th person absorbs the rounding remainder.
-List<int> splitByAmounts(
-  int totalPaise,
-  List<int> amounts,
-  int payerIndex,
-) {
+List<int> splitByAmounts(int totalPaise, List<int> amounts, int payerIndex) {
   assert(amounts.isNotEmpty);
   assert(payerIndex >= 0 && payerIndex < amounts.length);
 
